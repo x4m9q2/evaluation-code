@@ -24,17 +24,17 @@ DATASETS = {
         "input_json": ROOT / "data2/GQA/GQA_filtered_sampled_10000.json",
         "filter_root": ROOT / "analysis/gqa_sampled10000_qwen35_filter",
         "mask_dir": ROOT / "analysis/gqa_sampled10000_sam3_union_masks/masks",
-        "output_json": ROOT / "data2/GQA/GQA_filtered_sampled_10000_qwenkeep_sam3.json",
-        "output_npz": ROOT / "patch_mask_analysis_gqa_sampled10000_qwenkeep_sam3_compat.npz",
-        "summary_json": ROOT / "analysis/gqa_sampled10000_qwen35_filter/qwenkeep_sam3_package_summary.json",
+        "output_json": ROOT / "data2/GQA/GQA_filtered_sampled_10000_qwenkeep_sam3_nonumbermask.json",
+        "output_npz": ROOT / "patch_mask_analysis_gqa_sampled10000_qwenkeep_sam3_nonumbermask_compat.npz",
+        "summary_json": ROOT / "analysis/gqa_sampled10000_qwen35_filter/qwenkeep_sam3_nonumbermask_package_summary.json",
     },
     "vg": {
         "input_json": ROOT / "data2/vg/vg_filtered_sampled_10000.json",
         "filter_root": ROOT / "analysis/vg_sampled10000_qwen35_filter",
         "mask_dir": ROOT / "analysis/vg_sampled10000_sam3_union_masks/masks",
-        "output_json": ROOT / "data2/vg/vg_filtered_sampled_10000_qwenkeep_sam3.json",
-        "output_npz": ROOT / "patch_mask_analysis_vg_sampled10000_qwenkeep_sam3_compat.npz",
-        "summary_json": ROOT / "analysis/vg_sampled10000_qwen35_filter/qwenkeep_sam3_package_summary.json",
+        "output_json": ROOT / "data2/vg/vg_filtered_sampled_10000_qwenkeep_sam3_nonumbermask.json",
+        "output_npz": ROOT / "patch_mask_analysis_vg_sampled10000_qwenkeep_sam3_nonumbermask_compat.npz",
+        "summary_json": ROOT / "analysis/vg_sampled10000_qwen35_filter/qwenkeep_sam3_nonumbermask_package_summary.json",
     },
 }
 
@@ -257,6 +257,7 @@ def build_dataset_package(name, cfg):
         )
 
     missing_masks = []
+    number_mask_removed = []
     output_rows = []
     mask_rows = []
     for qid in sorted(input_qids):
@@ -264,9 +265,14 @@ def build_dataset_package(name, cfg):
         if qid in keep_qids:
             mask_path = cfg["mask_dir"] / f"{qid}.png"
             if mask_path.exists():
-                row["data_source"] = f"{name}_qwenkeep_sam3_masked"
-                row["mask_supervision"] = "sam3_patch_mask"
-                mask_rows.append(row)
+                if str(row.get("answer_type", "")) == "number":
+                    row["data_source"] = f"{name}_qwenkeep_number_nomask"
+                    row["mask_supervision"] = "none"
+                    number_mask_removed.append(qid)
+                else:
+                    row["data_source"] = f"{name}_qwenkeep_sam3_masked"
+                    row["mask_supervision"] = "sam3_patch_mask"
+                    mask_rows.append(row)
             else:
                 row["data_source"] = f"{name}_qwenkeep_missingmask_nomask"
                 row["mask_supervision"] = "none"
@@ -286,7 +292,8 @@ def build_dataset_package(name, cfg):
             "input_json": str(cfg["input_json"]),
             "output_json": str(cfg["output_json"]),
             "qwen_filter_merged_dir": str(cfg["filter_root"] / "merged"),
-            "compat_source": "qwen_keep_only_gqa_vg_sam3",
+            "compat_source": "qwen_keep_nonumbermask_gqa_vg_sam3",
+            "nonumbermask_rule": "keep all JSON rows, but set answer_type == 'number' mask_supervision to none and drop those mask rows from NPZ",
         },
     )
 
@@ -300,9 +307,11 @@ def build_dataset_package(name, cfg):
         "qwen_remove_total": len(remove_qids),
         "masked_total": len(mask_rows),
         "missing_mask_nomask_total": len(missing_masks),
+        "number_mask_removed_total": len(number_mask_removed),
         "mask_supervision_counts": dict(Counter(x["mask_supervision"] for x in output_rows)),
         "data_source_counts": dict(Counter(x["data_source"] for x in output_rows)),
         "missing_mask_qids_head": missing_masks[:20],
+        "number_mask_removed_qids_head": number_mask_removed[:20],
         "filter_summary": filter_summary,
     }
     write_json(cfg["summary_json"], summary)

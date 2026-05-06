@@ -341,7 +341,13 @@ def get_beta_and_logps(data_dict, model, args, is_minicpm=False, is_llava15=Fals
 
 class LLaVA15DPOTrainer(ZephyrTrainer):
 
-    def compute_loss(self, model: Module, inputs: dict, return_outputs=False):
+    def compute_loss(
+        self,
+        model: Module,
+        inputs: dict,
+        return_outputs: bool = False,
+        num_items_in_batch=None,
+    ):
         if self.args.past_index >= 0:
             raise NotImplementedError
 
@@ -349,7 +355,6 @@ class LLaVA15DPOTrainer(ZephyrTrainer):
             return self._nested_gather(x.mean()).mean().item()
 
         data_dict = inputs
-        print(data_dict.keys())
         policy_win_logp, policy_rej_logp, ref_win_logp, ref_rej_logp, beta = (
             get_beta_and_logps(data_dict, model, self.args, is_llava15=True)
         )

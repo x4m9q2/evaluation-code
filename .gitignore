@@ -21,6 +21,24 @@ runs/
 
 # Large model/data artifacts
 models/**/*
+code/shortcut_pipeline/bin/**/*
+code/llava_sage/clip-vit-large-patch14-336
+third_party/clip-vit-large-patch14-336
+third_party/napo_llava_ref/RefoMB/**/*
+third_party/napo_llava_ref/eval/**/*
+third_party/napo_llava_ref/minicpm-llama3-v-25/**/*
+third_party/napo_llava_ref/muffin/data/**/*
+annotations/**/*
+data/detect-shortcuts/**/*
+data/eval/**/*
+data/napo/**/*
+data/napo_llava/**/*
+data/stage2/**/*
+data/shortcut_pipeline/**/*
+data/sage_as/data/**/*
+data/sage_as/masks/**/*
+data/pretrain_llava_v1_5_mix665k_single_noocr_max200_imageonly_strict_noocr.json
+data/pretrain_llava_v1_5_mix665k_single_noocr_max200_imageonly_strict_noocr.stats.json
 data/images/**/*
 data/playground_data/**/*
 data/pope/**/*
@@ -54,5 +72,10 @@ data2/**/*
 !outputs/.gitkeep
 !models/README.md
 !data/README.md
-!data/sage_as/**
-
+!data/sage_as/
+!data/sage_as/README.md
+!data/sage_as/croissant.json
+!data/sage_as/manifest.json
+!data/sage_as/summary.json
+!data/sage_as/upload_sanitization_report.json
+!data/sage_as/upload_scan_report.json

@@ -16,7 +16,7 @@ Tasks:
   vqa-build            Build the final VQA mixed JSON + compat NPZ package.
   gqa-vg-generate      Generate GQA/VG sampled10000 SAM3 union masks.
   gqa-vg-filter        Run Qwen visual-cue filtering for GQA/VG and merge shard outputs.
-  gqa-vg-build         Build GQA/VG qwenkeep/nonumber/nonumbermask/area-filtered packages.
+  gqa-vg-build         Build GQA/VG qwenkeep+nonumbermask packages.
 
 Common env overrides:
   PYTHON_BIN, SAM3_CHECKPOINT, MASK_GPUS, NUM_SHARDS, BATCH_SIZE, RESOLUTION, SCORE_THRESH, RUN=1
@@ -64,9 +64,6 @@ case "${TASK}" in
     ;;
   gqa-vg-build)
     run_or_echo "${PYTHON_BIN}" "${BUNDLE_ROOT}/code/data_tools/gqa_vg_sam3_masks_sampled10000_20260430/build_qwenkeep_packages.py"
-    run_or_echo "${PYTHON_BIN}" "${BUNDLE_ROOT}/code/data_tools/gqa_vg_sam3_masks_sampled10000_20260430/build_nonumber_packages.py"
-    run_or_echo "${PYTHON_BIN}" "${BUNDLE_ROOT}/code/data_tools/gqa_vg_sam3_masks_sampled10000_20260430/build_nonumber_mask_packages.py"
-    run_or_echo "${PYTHON_BIN}" "${BUNDLE_ROOT}/code/data_tools/gqa_vg_sam3_masks_sampled10000_20260430/build_area_filtered_train_packages.py"
     ;;
   *)
     echo "[error] unknown task: ${TASK}" >&2

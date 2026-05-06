@@ -16,7 +16,6 @@ import torch
 import torch.distributed as dist
 
 import torch.nn as nn
-import matplotlib.pyplot as plt
 
 
 def weights_init(m):
@@ -29,6 +28,8 @@ def weights_init(m):
 
 
 def plot_images(images: dict):
+    import matplotlib.pyplot as plt
+
     x = images["input"]
     reconstruction = images["rec"]
     half_sample = images["half_sample"]

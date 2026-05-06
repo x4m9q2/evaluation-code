@@ -7,7 +7,7 @@ Usage:
   bash scripts/internvl/run_internvl25_vqav2_testdev.sh [options]
 
 Options:
-  --model-path PATH         Local InternVL2.5-8B directory. Default: /root/models/InternVL2_5-8B
+  --model-path PATH         Local InternVL2.5-8B directory. Default: models/InternVL2_5-8B
   --run-name NAME           Run/output name. Default: internvl25_8b_vqav2_testdev_YYYYmmdd_HHMMSS
   --ckpt NAME               Name used in VQAv2 answer/upload output paths. Default: run-name
   --gpus IDS                Comma-separated GPU ids for inference chunks. Default: 0,1,2,3
@@ -32,7 +32,7 @@ EOF
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BUNDLE_ROOT="${REPO_ROOT}/vqav2_eval_bundle_20260403"
 
-MODEL_PATH="/root/models/InternVL2_5-8B"
+MODEL_PATH="models/InternVL2_5-8B"
 RUN_NAME="internvl25_8b_vqav2_testdev_$(date +%Y%m%d_%H%M%S)"
 CKPT=""
 GPUS="0,1,2,3"

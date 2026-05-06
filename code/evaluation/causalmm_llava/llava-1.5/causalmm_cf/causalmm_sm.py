@@ -17,7 +17,7 @@ from transformers.generation.stopping_criteria import (
     validate_stopping_criteria,
 )
 import transformers
-from transformers.generation.utils import SampleOutput
+from transformers.generation.utils import GenerateDecoderOnlyOutput, GenerateEncoderDecoderOutput, SampleOutput
 
 
 import torch
@@ -91,7 +91,9 @@ def causalmm_sample(
     unfinished_sequences = torch.ones(input_ids.shape[0], dtype=torch.long, device=input_ids.device)
 
     this_peer_finished = False  # used by synced_gpus only
-    model_kwargs_cf = model_kwargs.copy() # copy model_kwargs
+    model_kwargs_cf = model_kwargs.copy()
+    model_kwargs_cf["past_key_values"] = None
+    model_kwargs_cf.pop("cache_position", None)
     # auto-regressive generation
     while True:
         if synced_gpus:
@@ -110,6 +112,7 @@ def causalmm_sample(
         # forward pass to get next token
         outputs, cf_outputs = self(
             **model_inputs,
+            cf_past_key_values=model_kwargs_cf.get("past_key_values"),
             return_dict=True,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
@@ -217,5 +220,153 @@ def causalmm_sample(
     else:
         return input_ids
 
+
+def causalmm__sample(
+    self,
+    input_ids: torch.LongTensor,
+    logits_processor: LogitsProcessorList,
+    stopping_criteria: StoppingCriteriaList,
+    generation_config,
+    synced_gpus: bool,
+    streamer: Optional["BaseStreamer"],
+    **model_kwargs,
+):
+    pad_token_id = generation_config._pad_token_tensor
+    output_attentions = generation_config.output_attentions
+    output_hidden_states = generation_config.output_hidden_states
+    output_scores = generation_config.output_scores
+    output_logits = generation_config.output_logits
+    return_dict_in_generate = generation_config.return_dict_in_generate
+    has_eos_stopping_criteria = any(hasattr(criteria, "eos_token_id") for criteria in stopping_criteria)
+    do_sample = generation_config.do_sample
+
+    scores = () if (return_dict_in_generate and output_scores) else None
+    raw_logits = () if (return_dict_in_generate and output_logits) else None
+    decoder_attentions = () if (return_dict_in_generate and output_attentions) else None
+    cross_attentions = () if (return_dict_in_generate and output_attentions) else None
+    decoder_hidden_states = () if (return_dict_in_generate and output_hidden_states) else None
+
+    if return_dict_in_generate and self.config.is_encoder_decoder:
+        encoder_attentions = model_kwargs["encoder_outputs"].get("attentions") if output_attentions else None
+        encoder_hidden_states = (
+            model_kwargs["encoder_outputs"].get("hidden_states") if output_hidden_states else None
+        )
+
+    batch_size, _ = input_ids.shape
+    this_peer_finished = False
+    unfinished_sequences = torch.ones(batch_size, dtype=torch.long, device=input_ids.device)
+
+    model_kwargs_cf = model_kwargs.copy()
+    model_kwargs_cf["past_key_values"] = None
+    model_kwargs_cf.pop("cache_position", None)
+    model_kwargs = self._get_initial_cache_position(input_ids, model_kwargs)
+    model_kwargs_cf = self._get_initial_cache_position(input_ids, model_kwargs_cf)
+
+    while self._has_unfinished_sequences(this_peer_finished, synced_gpus, device=input_ids.device):
+        model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
+        model_inputs.update({"output_attentions": output_attentions} if output_attentions else {})
+        model_inputs.update({"output_hidden_states": output_hidden_states} if output_hidden_states else {})
+
+        outputs, cf_outputs = self(
+            **model_inputs,
+            cf_past_key_values=model_kwargs_cf.get("past_key_values"),
+            return_dict=True,
+        )
+
+        model_kwargs = self._update_model_kwargs_for_generation(
+            outputs,
+            model_kwargs,
+            is_encoder_decoder=self.config.is_encoder_decoder,
+        )
+        model_kwargs_cf = self._update_model_kwargs_for_generation(
+            cf_outputs,
+            model_kwargs_cf,
+            is_encoder_decoder=self.config.is_encoder_decoder,
+        )
+
+        if synced_gpus and this_peer_finished:
+            continue
+
+        next_token_logits = outputs.logits[:, -1, :].to(copy=True, dtype=torch.float32, device=input_ids.device)
+        next_token_logits_cf = cf_outputs.logits[:, -1, :].to(copy=True, dtype=torch.float32, device=input_ids.device)
+
+        gamma = model_kwargs.get("gamma") if model_kwargs.get("gamma") is not None else 0.5
+        epsilon = model_kwargs.get("epsilon") if model_kwargs.get("epsilon") is not None else 0.1
+        cutoff = torch.log(torch.tensor(epsilon, device=input_ids.device)) + next_token_logits.max(dim=-1, keepdim=True).values
+        next_token_scores = ((1 + gamma) * next_token_logits - gamma * next_token_logits_cf).masked_fill(
+            next_token_logits < cutoff, -float("inf")
+        )
+        next_token_scores = logits_processor(input_ids, next_token_scores)
+
+        if return_dict_in_generate:
+            if output_scores:
+                scores += (next_token_scores,)
+            if output_logits:
+                raw_logits += (next_token_logits,)
+            if output_attentions:
+                decoder_attentions += (
+                    (outputs.decoder_attentions,) if self.config.is_encoder_decoder else (outputs.attentions,)
+                )
+                if self.config.is_encoder_decoder:
+                    cross_attentions += (outputs.cross_attentions,)
+
+            if output_hidden_states:
+                decoder_hidden_states += (
+                    (outputs.decoder_hidden_states,)
+                    if self.config.is_encoder_decoder
+                    else (outputs.hidden_states,)
+                )
+
+        if do_sample:
+            probs = nn.functional.softmax(next_token_scores, dim=-1)
+            next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
+        else:
+            next_tokens = torch.argmax(next_token_scores, dim=-1)
+
+        if has_eos_stopping_criteria:
+            next_tokens = next_tokens * unfinished_sequences + pad_token_id * (1 - unfinished_sequences)
+
+        input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
+        if streamer is not None:
+            streamer.put(next_tokens.cpu())
+
+        unfinished_sequences = unfinished_sequences & ~stopping_criteria(input_ids, scores)
+        this_peer_finished = unfinished_sequences.max() == 0
+
+        del outputs
+        del cf_outputs
+
+    if streamer is not None:
+        streamer.end()
+
+    if return_dict_in_generate:
+        if self.config.is_encoder_decoder:
+            return GenerateEncoderDecoderOutput(
+                sequences=input_ids,
+                scores=scores,
+                logits=raw_logits,
+                encoder_attentions=encoder_attentions,
+                encoder_hidden_states=encoder_hidden_states,
+                decoder_attentions=decoder_attentions,
+                cross_attentions=cross_attentions,
+                decoder_hidden_states=decoder_hidden_states,
+                past_key_values=model_kwargs.get("past_key_values"),
+            )
+        else:
+            return GenerateDecoderOnlyOutput(
+                sequences=input_ids,
+                scores=scores,
+                logits=raw_logits,
+                attentions=decoder_attentions,
+                hidden_states=decoder_hidden_states,
+                past_key_values=model_kwargs.get("past_key_values"),
+            )
+    return input_ids
+
+
 def evolve_causalmm_sampling():
-    transformers.generation.utils.GenerationMixin.sample = causalmm_sample
+    mixin = transformers.generation.utils.GenerationMixin
+    if hasattr(mixin, "sample"):
+        mixin.sample = causalmm_sample
+    if hasattr(mixin, "_sample"):
+        mixin._sample = causalmm__sample

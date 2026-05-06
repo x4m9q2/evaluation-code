@@ -46,15 +46,18 @@ def main():
         for source_index in ordered_indices:
             f.write(json.dumps(merged_by_index[source_index], ensure_ascii=False) + "\n")
 
-    final_rows = [
-        {
-            "question": merged_by_index[source_index]["question"],
-            "llm_output": merged_by_index[source_index]["llm_output"],
-            "correct_answer": merged_by_index[source_index]["correct_answer"],
-            "answer_type": merged_by_index[source_index]["answer_type"],
-        }
-        for source_index in ordered_indices
-    ]
+    final_rows = []
+    for source_index in ordered_indices:
+        item = merged_by_index[source_index]
+        row = dict(item.get("source", {}))
+        row["question_id"] = int(item["question_id"])
+        row["question"] = item["question"]
+        row["model_pred"] = item["llm_output"]
+        row["llm_output"] = item["llm_output"]
+        row["answer"] = item.get("correct_answer", row.get("answer", ""))
+        row["correct_answer"] = item.get("correct_answer", row.get("correct_answer", row.get("answer", "")))
+        row["answer_type"] = item.get("answer_type", row.get("answer_type", ""))
+        final_rows.append(row)
     with Path(args.output_file).open("w", encoding="utf-8") as f:
         json.dump(final_rows, f, ensure_ascii=False, indent=2)
 

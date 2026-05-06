@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--model-path", required=True)
     parser.add_argument("--question-file", required=True, help="JSON or JSONL with question_id/image_id/question fields.")
-    parser.add_argument("--image-folder", required=True, help="COCO image root, e.g. /root/train2014")
+    parser.add_argument("--image-folder", required=True, help="COCO image root, e.g. data/images/coco/train2014")
     parser.add_argument("--answers-file", required=True, help="Output JSONL prediction path.")
     parser.add_argument("--num-chunks", type=int, default=1)
     parser.add_argument("--chunk-idx", type=int, default=0)

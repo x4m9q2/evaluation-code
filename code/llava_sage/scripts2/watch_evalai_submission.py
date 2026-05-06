@@ -15,7 +15,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--submission-file", type=Path, required=True)
     parser.add_argument("--challenge-id", type=int, required=True)
     parser.add_argument("--phase-id", type=int, required=True)
-    parser.add_argument("--token-file", type=Path, default=Path("/root/.evalai/token.json"))
+    parser.add_argument("--token-file", type=Path, default=Path(".evalai/token.json"))
     parser.add_argument("--method-name", required=True)
     parser.add_argument("--method-description", default="")
     parser.add_argument("--submit-response-path", type=Path, required=True)

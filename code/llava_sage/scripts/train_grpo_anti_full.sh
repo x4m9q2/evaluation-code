@@ -9,7 +9,7 @@ cd /path/to/sage_repro_bundle
 PROMPT_VERSION="v1"
 MODEL_PATH="/path/to/sage_repro_bundle/checkpoints/llava_merged_train_raw_1gpu_wandb_from0_0311_013658"
 DATA_PATH="./grpo_train.json"
-IMAGE_FOLDER="/root/train2014"
+IMAGE_FOLDER="data/images/coco/train2014"
 VISION_TOWER="./clip-vit-large-patch14-336"
 EVAL_DATA_PATH="./grpo_val.json"
 OUTPUT_DIR="./checkpoints/llava-grpo-anti"

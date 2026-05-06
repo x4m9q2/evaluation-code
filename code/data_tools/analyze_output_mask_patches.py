@@ -10,7 +10,7 @@ from PIL import Image
 
 
 DEFAULT_OUTPUT_MASK_DIR = Path("/path/to/sage_repro_bundle/output_mask")
-DEFAULT_ORIGINAL_DIR = Path("/root/train2014")
+DEFAULT_ORIGINAL_DIR = Path("data/images/coco/train2014")
 DEFAULT_MODEL_CONFIG = Path("/path/to/sage_repro_bundle/llava-v1.5-7b/config.json")
 DEFAULT_VISION_CONFIG = Path("/path/to/sage_repro_bundle/clip-vit-large-patch14-336/config.json")
 DEFAULT_PREPROCESSOR_CONFIG = Path("/path/to/sage_repro_bundle/clip-vit-large-patch14-336/preprocessor_config.json")

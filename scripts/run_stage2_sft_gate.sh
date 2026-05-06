@@ -22,6 +22,12 @@ unset NCCL_P2P_DISABLE
 
 mkdir -p "${OUTPUT_DIR}" "$(dirname "${LOG_FILE}")"
 
+check_path "${PRETRAIN_CHECKPOINT}" "Gemma pretrain checkpoint"
+check_path "${GATE_TEXT_MODEL_ID}" "gate text encoder"
+check_path "${STAGE2_DATA}" "stage-2 JSON"
+check_path "${STAGE2_IMAGE_FOLDER}" "stage-2 image root"
+check_path "${PATCH_MASK_ANALYSIS_PATH}" "patch mask NPZ"
+
 {
   echo "[run] ${RUN_NAME}"
   echo "[model] ${PRETRAIN_CHECKPOINT}"
@@ -38,7 +44,7 @@ mkdir -p "${OUTPUT_DIR}" "$(dirname "${LOG_FILE}")"
 } | tee "${LOG_FILE}"
 
 cd "${GEMMA_DIR}"
-"${PYTHON_BIN}" -m torch.distributed.run \
+run_or_echo "${PYTHON_BIN}" -m torch.distributed.run \
   --standalone \
   --nproc_per_node="${NUM_GPUS}" \
   src/train/train_sft.py \

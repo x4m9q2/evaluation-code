@@ -19,7 +19,7 @@ export CUDA_VISIBLE_DEVICES
 
 MODEL_NAME_OR_PATH="${MODEL_NAME_OR_PATH:-${REPO_ROOT}/checkpoints/assembled_llava_v15_from_mmproj_gate_20260311}"
 DATA_PATH="${DATA_PATH:-${REPO_ROOT}/dpo_train.json}"
-IMAGE_FOLDER="${IMAGE_FOLDER:-/root/train2014}"
+IMAGE_FOLDER="${IMAGE_FOLDER:-data/images/coco/train2014}"
 VISION_TOWER="${VISION_TOWER:-${REPO_ROOT}/clip-vit-large-patch14-336}"
 DEEPSPEED_CONFIG="${DEEPSPEED_CONFIG:-${REPO_ROOT}/scripts/zero2_bf16.json}"
 OUTPUT_DIR="${OUTPUT_DIR:-${REPO_ROOT}/checkpoints/finetune_dpo_xformers_gate}"

@@ -20,6 +20,11 @@ from transformers import set_seed
 from causalmm_cf.causalmm_sm import evolve_causalmm_sampling
 evolve_causalmm_sampling()
 
+
+def clean_question_text(text):
+    return text.replace(DEFAULT_IMAGE_TOKEN, "").strip()
+
+
 def eval_model(args):
     disable_torch_init()
 
@@ -41,6 +46,7 @@ def eval_model(args):
                 img_path = os.path.join(args.image_folder, filename.replace('.txt', ''), img)
                 assert os.path.exists(img_path), f"Image not found: {img_path}"
 
+                question = clean_question_text(question)
                 if model.config.mm_use_im_start_end:
                     question = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + question
                 else:

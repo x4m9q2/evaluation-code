@@ -23,7 +23,7 @@ MASTER_PORT="${MASTER_PORT:-29519}"
 MODEL_NAME_OR_PATH="${MODEL_NAME_OR_PATH:-${REPO_ROOT}/checkpoints/assembled_llava_v15_from_pretrain_meanreg_20260319_052641}"
 PRETRAIN_MM_MLP_ADAPTER="${PRETRAIN_MM_MLP_ADAPTER:-}"
 DATA_PATH="${DATA_PATH:-${REPO_ROOT}/train_raw.json}"
-IMAGE_FOLDER="${IMAGE_FOLDER:-/root/train2014}"
+IMAGE_FOLDER="${IMAGE_FOLDER:-data/images/coco/train2014}"
 VISION_TOWER="${VISION_TOWER:-${REPO_ROOT}/clip-vit-large-patch14-336}"
 PATCH_MASK_ANALYSIS_PATH="${PATCH_MASK_ANALYSIS_PATH:-${REPO_ROOT}/patch_mask_analysis_output_mask_coco_seg_direct_llava_pad336_patch14.npz}"
 OUTPUT_DIR="${OUTPUT_DIR:-${REPO_ROOT}/checkpoints/finetune_stage2_train_raw_mask_suppress_mask25_ddp_p2p}"
@@ -66,7 +66,7 @@ echo "  NCCL_P2P_DISABLE=${NCCL_P2P_DISABLE}"
 echo "  NCCL_IB_DISABLE=${NCCL_IB_DISABLE}"
 
 TRAIN_CMD=(
-    /root/venv/unifolm/bin/torchrun
+    .venv_unifolm/bin/torchrun
     --nproc_per_node "${NUM_GPUS}"
     --master_port "${MASTER_PORT}"
     llava/train/train_xformers.py

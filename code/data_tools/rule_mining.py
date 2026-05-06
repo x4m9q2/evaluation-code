@@ -126,12 +126,13 @@ def fit(
     for rule in tqdm(pre_rules):
         itemset, ans, support_with_ans = rule
         if len(itemset) == 0:
-            confidence = support
+            confidence = support_with_ans
         elif itemset in supports_by_itemset:
             # add confidence
             confidence = support_with_ans / supports_by_itemset[itemset]
         else:
             print(f"Missing data for itemset {itemset}...")
+            continue
         rule = Rule(
             itemset=itemset, ans=ans, sup=supports_by_itemset[itemset], conf=confidence
         )

@@ -2,7 +2,6 @@
 import argparse
 import json
 import os
-import subprocess
 import sys
 import time
 import io
@@ -32,12 +31,8 @@ from src.train.monkey_patch_forward import replace_gemma3_forward
 
 DEFAULT_MODEL_PATH = BUNDLE_ROOT / "models/Gemma-3-4B-IT"
 DEFAULT_DATA_PATH = BUNDLE_ROOT / "data/eval/test_raw_with_shortcut_answer.json"
-DEFAULT_IMAGE_FOLDER = BUNDLE_ROOT / "data/playground_data/coco/train2014"
+DEFAULT_IMAGE_FOLDER = BUNDLE_ROOT / "data/images/coco/train2014"
 DEFAULT_OUTPUT_ROOT = BUNDLE_ROOT / "outputs/infer_result"
-DEFAULT_XVERIFY_ROOT = ROOT_DIR / "x_verify"
-DEFAULT_XVERIFY_MODEL = DEFAULT_XVERIFY_ROOT / "xVerify-0.5B-I"
-DEFAULT_EVAL_SHORTCUT_METRICS = ROOT_DIR / "scripts2/eval_shortcut_metrics.py"
-DEFAULT_XVERIFY_PYTHON = Path(sys.executable)
 DEFAULT_GATE_TEXT_MODEL = BUNDLE_ROOT / "models/siglip-so400m-patch14-384"
 
 
@@ -60,13 +55,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--chunk-idx", type=int, default=0)
     parser.add_argument("--gpu", default="0")
     parser.add_argument("--overwrite", action="store_true")
-    parser.add_argument("--run-xverify", action="store_true")
-    parser.add_argument("--xverify-root", type=Path, default=DEFAULT_XVERIFY_ROOT)
-    parser.add_argument("--xverify-model-path", type=Path, default=DEFAULT_XVERIFY_MODEL)
-    parser.add_argument("--xverify-gpu", default="0")
-    parser.add_argument("--xverify-batch-size", type=int, default=32)
-    parser.add_argument("--xverify-python", type=Path, default=DEFAULT_XVERIFY_PYTHON)
-    parser.add_argument("--eval-shortcut-metrics", type=Path, default=DEFAULT_EVAL_SHORTCUT_METRICS)
     parser.add_argument("--gate-text-model-id", type=Path, default=DEFAULT_GATE_TEXT_MODEL)
     parser.add_argument("--gate-text-max-length", type=int, default=64)
     parser.add_argument("--no-short-answer-prompt", action="store_true")
@@ -331,35 +319,11 @@ def load_model_and_processors(
     return processor, model, gate_text_tokenizer
 
 
-def run_combined_xverify(merged_file: Path, args: argparse.Namespace) -> Path:
-    cmd = [
-        str(args.xverify_python),
-        str(args.eval_shortcut_metrics),
-        "--input-path",
-        str(merged_file),
-        "--xverify-root",
-        str(args.xverify_root),
-        "--xverify-model-path",
-        str(args.xverify_model_path),
-        "--gpu",
-        args.xverify_gpu,
-        "--batch-size",
-        str(args.xverify_batch_size),
-    ]
-    if args.overwrite:
-        cmd.append("--overwrite")
-    subprocess.run(cmd, cwd=str(BUNDLE_ROOT), check=True)
-    return merged_file.parent / f"{merged_file.stem}.xverify_metrics.json"
-
-
 def main() -> None:
     args = parse_args()
     ensure_exists(args.model_path, "model path")
     ensure_exists(args.data_path, "data path")
     ensure_exists(args.image_folder, "image folder")
-    if args.run_xverify:
-        ensure_exists(args.eval_shortcut_metrics, "eval_shortcut_metrics.py")
-        ensure_exists(args.xverify_python, "xverify python")
 
     if args.num_chunks < 1:
         raise ValueError("--num-chunks must be >= 1")
@@ -378,11 +342,7 @@ def main() -> None:
 
     if merged_file.exists() and not args.overwrite:
         print(f"[skip] merged output already exists: {merged_file}", flush=True)
-        if args.run_xverify:
-            summary_path = run_combined_xverify(merged_file, args)
-            print(summary_path)
-        else:
-            print(merged_file)
+        print(merged_file)
         return
 
     if args.overwrite:
@@ -492,12 +452,7 @@ def main() -> None:
         "pct_hit_max_tokens": total_hit_max_tokens / len(rows) if rows else 0.0,
     }
     save_json(stats, stats_file)
-
-    if args.run_xverify:
-        summary_path = run_combined_xverify(merged_file, args)
-        print(summary_path)
-    else:
-        print(merged_file)
+    print(merged_file)
 
 
 if __name__ == "__main__":

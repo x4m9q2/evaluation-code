@@ -13,7 +13,7 @@ R0_PATH = ROOT / "infer_result_test_raw_gate_suppress_ckpt16470_r0/checkpoint-16
 R1_PATH = ROOT / "infer_result_test_raw_gate_suppress_ckpt16470_r1p0/checkpoint-16470/test_raw_with_shortcut_answer.json"
 RULE_PATH = ROOT / "merged_output_rule_mapping.json"
 MASK_PATH = ROOT / "patch_mask_analysis_output_mask_coco_seg_direct_llava_pad336_patch14.npz"
-IMAGE_DIR = Path("/root/train2014")
+IMAGE_DIR = Path("data/images/coco/train2014")
 
 
 SELECTED_QIDS = [

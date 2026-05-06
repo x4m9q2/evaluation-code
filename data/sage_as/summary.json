@@ -4,14 +4,33 @@
     {
       "dataset": "vqa",
       "split": "train",
-      "records": 97582,
+      "records": 219562,
       "answer_type_counts": {
-        "number": 7301,
-        "other": 21452,
-        "yes/no": 68829
+        "number": 16428,
+        "other": 48268,
+        "yes/no": 154866
       },
       "qwen_filter_applied_to_json": false,
-      "absolute_or_local_path_fields_remaining": 0
+      "absolute_or_local_path_fields_remaining": 0,
+      "stage2_experiment_training_mix": true,
+      "data_source_counts": {
+        "train_raw_filtered_masked": 75196,
+        "train_raw_removed_nomask": 22386,
+        "vqa_train2014_nomask": 121980
+      },
+      "mask_supervision_counts": {
+        "none": 144366,
+        "sam3_patch_mask": 75196
+      },
+      "fields": [
+        "answer",
+        "answer_type",
+        "data_source",
+        "image_id",
+        "mask_supervision",
+        "question",
+        "question_id"
+      ]
     },
     {
       "dataset": "vqa",
@@ -115,5 +134,5 @@
     "vg": false
   },
   "upload_ready": true,
-  "notes": "Local absolute paths have been removed from public metadata and data files. One remaining scanner hit is a natural-language substring in an English question, not a credential."
+  "notes": "Local absolute paths have been removed from public metadata and data files. One remaining scanner hit is a natural-language substring in an English question, not a credential. VQA v2-CMSV train.json is the stage-2 experiment training mix used in the main SAGE runs; it contains masked generated-CMSV training records, retained no-mask generated records, and VQA train2014 no-mask records."
 }

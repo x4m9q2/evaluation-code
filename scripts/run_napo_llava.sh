@@ -42,7 +42,7 @@ run_or_echo "${PYTHON_BIN}" -m deepspeed.launcher.runner --master_port "${MASTER
   --per_device_train_batch_size "${PER_DEVICE_TRAIN_BATCH_SIZE:-2}" \
   --per_device_eval_batch_size "${PER_DEVICE_EVAL_BATCH_SIZE:-2}" \
   --gradient_accumulation_steps "${GRADIENT_ACCUMULATION_STEPS:-4}" \
-  --evaluation_strategy no \
+  --eval_strategy no \
   --save_strategy epoch \
   --save_total_limit 3 \
   --data_source_names '' \

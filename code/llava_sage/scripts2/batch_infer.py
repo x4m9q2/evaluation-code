@@ -6,7 +6,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Optional
 
 
 SCRIPT_PATH = Path(__file__).resolve()
@@ -16,8 +16,6 @@ BUNDLE_ROOT = LLAVA_CODE_ROOT.parents[1]
 DEFAULT_DATA_PATH = BUNDLE_ROOT / "data/eval/test_raw_with_shortcut_answer.json"
 DEFAULT_IMAGE_FOLDER = BUNDLE_ROOT / "data/images/coco/train2014"
 DEFAULT_OUTPUT_ROOT = BUNDLE_ROOT / "outputs/llava_infer"
-DEFAULT_XVERIFY_ROOT = BUNDLE_ROOT / "code/evaluation/x_verify"
-DEFAULT_XVERIFY_MODEL = BUNDLE_ROOT / "models/xVerify-0.5B-I"
 
 
 def parse_args() -> argparse.Namespace:
@@ -36,9 +34,15 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--data-path", type=Path, required=True)
     parser.add_argument(
+        "--dataset",
+        choices=["auto", "vqa", "vqa_v2_cmsv", "gqa", "gqa_cmsv", "vg", "vg_cmsv"],
+        default="auto",
+        help="Dataset format used to normalize question/answer/image fields.",
+    )
+    parser.add_argument(
         "--has-gate",
         required=True,
-        choices=["true", "false"],
+        choices=["auto", "true", "false"],
         help="Whether to force-enable the model's dual-input gate during inference.",
     )
     parser.add_argument("--image-folder", type=Path, default=DEFAULT_IMAGE_FOLDER)
@@ -46,6 +50,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gpu", default="0", help="CUDA_VISIBLE_DEVICES value.")
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--num-workers", type=int, default=4)
+    parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--patch-mask-analysis-path", type=Path, default=None)
     parser.add_argument("--gate-patch-suppress-ratio", type=float, default=0.0)
     parser.add_argument(
@@ -60,8 +65,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--torch-dtype",
         choices=["auto", "float16", "fp16", "bfloat16", "bf16", "float32", "fp32"],
-        default="auto",
-        help="Inference dtype passed to model_vqa_loader. auto follows checkpoint config.json.",
+        default="bf16",
+        help="Inference dtype passed to model_vqa_loader. Defaults to bf16.",
     )
     parser.add_argument(
         "--begin-suppress-eos",
@@ -69,15 +74,6 @@ def parse_args() -> argparse.Namespace:
         help="Pass --begin-suppress-eos to model_vqa_loader.",
     )
     parser.add_argument("--conv-mode", default="llava_v1")
-    parser.add_argument(
-        "--run-xverify",
-        action="store_true",
-        help="After merged inference JSON is written, also run the combined accuracy + shortcut-rate workflow.",
-    )
-    parser.add_argument("--xverify-root", type=Path, default=DEFAULT_XVERIFY_ROOT)
-    parser.add_argument("--xverify-model-path", type=Path, default=DEFAULT_XVERIFY_MODEL)
-    parser.add_argument("--xverify-gpu", default="0", help="CUDA_VISIBLE_DEVICES value for xVerify.")
-    parser.add_argument("--xverify-batch-size", type=int, default=32)
     parser.add_argument(
         "--overwrite",
         action="store_true",
@@ -91,7 +87,19 @@ def ensure_exists(path: Path, kind: str) -> None:
         raise FileNotFoundError(f"{kind} not found: {path}")
 
 
-def load_json_array(path: Path) -> List[dict]:
+def load_rows(path: Path) -> List[dict]:
+    if path.suffix == ".jsonl":
+        rows = []
+        with path.open() as f:
+            for line_no, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                row = json.loads(line)
+                if not isinstance(row, dict):
+                    raise ValueError(f"Expected a JSON object at {path}:{line_no}")
+                rows.append(row)
+        return rows
     with path.open() as f:
         data = json.load(f)
     if not isinstance(data, list):
@@ -99,16 +107,105 @@ def load_json_array(path: Path) -> List[dict]:
     return data
 
 
+def canonical_dataset_name(dataset: str) -> str:
+    if dataset in {"vqa", "vqa_v2_cmsv"}:
+        return "vqa"
+    if dataset in {"gqa", "gqa_cmsv"}:
+        return "gqa"
+    if dataset in {"vg", "vg_cmsv"}:
+        return "vg"
+    return dataset
+
+
+def infer_dataset_from_row(row: dict) -> Optional[str]:
+    image_path = str(row.get("image_path") or row.get("image") or "").lower()
+    if "masked_images/gqa" in image_path or "masked_results_gqa" in image_path or "/gqa/" in image_path:
+        return "gqa"
+    if "masked_images/vg" in image_path or "masked_results_vg" in image_path or "/vg/" in image_path or "visual_genome" in image_path:
+        return "vg"
+    if row.get("generated_question") is None and row.get("question") is not None:
+        return "vqa"
+    return None
+
+
+def resolve_dataset(dataset: str, row: dict) -> str:
+    dataset = canonical_dataset_name(dataset)
+    if dataset != "auto":
+        return dataset
+    inferred = infer_dataset_from_row(row)
+    if inferred is None:
+        raise ValueError(
+            "Could not infer dataset for row. Set --dataset to vqa, gqa, or vg. "
+            f"question_id={row.get('question_id')}"
+        )
+    return inferred
+
+
+def first_nonempty(row: dict, keys: Iterable[str]) -> str:
+    for key in keys:
+        value = row.get(key)
+        if value is not None and str(value).strip() != "":
+            return str(value)
+    return ""
+
+
+def find_vg_image(image_id: int, image_folder: Path) -> str:
+    candidates = [
+        f"{image_id}.jpg",
+        f"VG_100K/{image_id}.jpg",
+        f"VG_100K_2/{image_id}.jpg",
+    ]
+    for candidate in candidates:
+        if (image_folder / candidate).exists():
+            return candidate
+    return f"VG_100K/{image_id}.jpg"
+
+
+def infer_image_name(row: dict, dataset: str, image_folder: Path) -> str:
+    image_value = first_nonempty(row, ["image"])
+    if image_value:
+        return image_value
+    image_id = int(row["image_id"])
+    if dataset == "vqa":
+        return f"COCO_train2014_{image_id:012d}.jpg"
+    if dataset == "gqa":
+        return f"{image_id}.jpg"
+    if dataset == "vg":
+        return find_vg_image(image_id, image_folder)
+    raise ValueError(f"Unsupported dataset for image resolution: {dataset}")
+
+
+def normalize_eval_row(row: dict, dataset_arg: str, image_folder: Path) -> dict:
+    dataset = resolve_dataset(dataset_arg, row)
+    out = dict(row)
+    question = first_nonempty(row, ["question", "generated_question", "text"])
+    answer = first_nonempty(row, ["answer", "generated_answer"])
+    shortcut_answer = first_nonempty(row, ["shortcut_answer", "original_answer"])
+    if not question:
+        raise ValueError(f"Missing question/generated_question for question_id={row.get('question_id')}")
+    if not answer:
+        raise ValueError(f"Missing answer/generated_answer for question_id={row.get('question_id')}")
+    if not shortcut_answer:
+        raise ValueError(f"Missing shortcut_answer/original_answer for question_id={row.get('question_id')}")
+    out["question"] = question
+    out["answer"] = answer
+    out["shortcut_answer"] = shortcut_answer
+    out["image"] = infer_image_name(row, dataset, image_folder)
+    out["eval_dataset"] = dataset
+    return out
+
+
+def normalize_eval_rows(rows: Iterable[dict], dataset_arg: str, image_folder: Path) -> List[dict]:
+    return [normalize_eval_row(row, dataset_arg, image_folder) for row in rows]
+
+
 def build_eval_questions(src_rows: Iterable[dict], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w") as f:
         for item in src_rows:
-            image_name = item.get("image")
-            if not image_name:
-                image_name = f"COCO_train2014_{int(item['image_id']):012d}.jpg"
             rec = {
                 "question_id": int(item["question_id"]),
-                "image": image_name,
+                "image": item["image"],
                 "text": item["question"],
             }
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
@@ -184,28 +281,6 @@ def cleanup_intermediate_files(paths: List[Path]) -> None:
     for path in paths:
         if path.exists():
             path.unlink()
-
-
-def run_combined_xverify(merged_file: Path, args: argparse.Namespace) -> None:
-    cmd = [
-        sys.executable,
-        str(LLAVA_CODE_ROOT / "scripts2/eval_shortcut_metrics.py"),
-        "--input-path",
-        str(merged_file),
-        "--xverify-root",
-        str(args.xverify_root),
-        "--xverify-model-path",
-        str(args.xverify_model_path),
-        "--gpu",
-        args.xverify_gpu,
-        "--batch-size",
-        str(args.xverify_batch_size),
-    ]
-    if args.overwrite:
-        cmd.append("--overwrite")
-    env = os.environ.copy()
-    env["PYTHONPATH"] = f"{LLAVA_CODE_ROOT}{os.pathsep}{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(LLAVA_CODE_ROOT)
-    subprocess.run(cmd, cwd=LLAVA_CODE_ROOT, env=env, check=True)
 
 
 def run_one_model(model_dir: Path, src_rows: List[dict], args: argparse.Namespace) -> None:
@@ -325,9 +400,6 @@ def run_one_model(model_dir: Path, src_rows: List[dict], args: argparse.Namespac
     cleanup_targets.extend(pred_files)
     cleanup_intermediate_files(cleanup_targets)
 
-    if args.run_xverify:
-        run_combined_xverify(merged_file, args)
-
     print(f"[done] {model_tag}: {merged_file}", flush=True)
 
 
@@ -342,7 +414,9 @@ def main() -> None:
     if not (args.model_path / "config.json").exists():
         raise FileNotFoundError(f"config.json not found under model path: {args.model_path}")
 
-    src_rows = load_json_array(args.data_path)
+    src_rows = normalize_eval_rows(load_rows(args.data_path), args.dataset, args.image_folder)
+    if args.limit is not None:
+        src_rows = src_rows[:args.limit]
     run_one_model(args.model_path, src_rows, args)
 
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV_DIR="${VENV_DIR:-/root/venv/qwen35_vllm}"
+VENV_DIR="${VENV_DIR:-.venv_qwen35_vllm}"
 
 if [[ ! -x "${VENV_DIR}/bin/python" ]]; then
   echo "Python was not found in ${VENV_DIR}. Run scripts/qwen35/setup_qwen35_vllm_env.sh first." >&2

@@ -764,7 +764,7 @@ def normalize_multimodal_sample(sample: Dict, image_folder: Optional[str] = None
             "image": _resolve_vqa_image(image_id, image_folder),
             "answer_type": sample.get("answer_type", "other"),
             "data_source": sample.get("data_source", "vqa"),
-            "mask_supervision": sample.get("mask_supervision", "sam3_patch_mask"),
+            "mask_supervision": sample.get("mask_supervision", ""),
             "conversations": [
                 {"from": "human", "value": f"{DEFAULT_IMAGE_TOKEN}\n{question}"},
                 {"from": "gpt", "value": answer},
@@ -788,7 +788,7 @@ def normalize_multimodal_sample(sample: Dict, image_folder: Optional[str] = None
             "image": image,
             "answer_type": sample.get("answer_type", "other"),
             "data_source": sample.get("data_source", source),
-            "mask_supervision": sample.get("mask_supervision", "sam3_patch_mask"),
+            "mask_supervision": sample.get("mask_supervision", ""),
             "conversations": [
                 {"from": "human", "value": f"{DEFAULT_IMAGE_TOKEN}\n{question}"},
                 {"from": "gpt", "value": answer},
@@ -936,7 +936,6 @@ class LazySupervisedDataset(Dataset):
             row_idx = self.patch_mask_question_id_to_row.get(question_id, None)
             if (
                 row_idx is None
-                or sample_mask_supervision != "sam3_patch_mask"
                 or sample_answer_type == "number"
             ):
                 patch_mask_coverage = np.zeros((self.patch_mask_coverage.shape[1],), dtype=np.float32)
@@ -951,6 +950,8 @@ class LazySupervisedDataset(Dataset):
         data_dict["data_source"] = str(self.list_data_dict[i].get("data_source", ""))
         data_dict["answer_type"] = sample_answer_type
         mask_supervision = sample_mask_supervision
+        if self.patch_mask_coverage is not None and row_idx is not None:
+            mask_supervision = "sam3_patch_mask"
         if (
             self.patch_mask_coverage is not None
             and row_idx is not None

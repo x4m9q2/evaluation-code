@@ -49,21 +49,24 @@
   },
   "@type": "sc:Dataset",
   "conformsTo": "http://mlcommons.org/croissant/1.1",
-  "name": "SAGE-AS",
+  "name": "VQA-CMSV Benchmark",
   "alternateName": [
-    "SAGE-AS",
-    "as-benchmark-artifacts/sage-as"
+    "VQA-CMSV Benchmark",
+    "as-benchmark-artifacts/vqa-cmsv-benchmark",
+    "VQA v2-CMSV",
+    "GQA-CMSV",
+    "VG-CMSV"
   ],
-  "description": "SAGE-AS is a derived visual-question-answering shortcut-bias benchmark package containing VQA-AS, GQA-AS, and Visual Genome-AS train/validation/test annotations, plus filtered LLaVA 24x24 patch-mask NPZ metadata for mask-supervision experiments. Raw or masked images are not redistributed; users must obtain upstream images separately and comply with their licenses.",
-  "url": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as",
-  "citeAs": "SAGE-AS Data Package. Anonymous NeurIPS 2026 Evaluations and Datasets submission artifact.",
+  "description": "VQA-CMSV Benchmark is a derived visual-question-answering cross-modality shortcut-violation benchmark package containing VQA v2-CMSV, GQA-CMSV, and VG-CMSV train/validation/test annotations, plus filtered LLaVA 24x24 patch-mask NPZ metadata for mask-supervision experiments. Raw or masked images are not redistributed; users must obtain upstream images separately and comply with their licenses.",
+  "url": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark",
+  "citeAs": "VQA-CMSV Benchmark Data Package. Anonymous NeurIPS 2026 Evaluations and Datasets submission artifact.",
   "datePublished": "2026-05-04",
   "version": "1.0.0",
   "isLiveDataset": false,
   "inLanguage": [
     "en"
   ],
-  "license": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/LICENSE",
+  "license": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/LICENSE",
   "creator": {
     "@type": "Organization",
     "name": "as-benchmark-artifacts",
@@ -85,25 +88,30 @@
     "gqa",
     "visual-genome",
     "croissant",
-    "responsible-ai"
+    "responsible-ai",
+    "vqa-cmsv",
+    "vqa-v2-cmsv",
+    "gqa-cmsv",
+    "vg-cmsv",
+    "cross-modality-shortcut"
   ],
   "distribution": [
     {
       "@type": "cr:FileObject",
       "@id": "vqa_train_json",
       "name": "train.json",
-      "description": "VQA-AS train split annotations; 97582 records. Raw images are not included.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vqa/train.json",
+      "description": "VQA v2-CMSV stage-2 experiment train annotations; 219562 records. This training mix matches the main SAGE stage-2 experiments and contains masked generated-CMSV records, retained no-mask generated records, and VQA train2014 no-mask records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/data/vqa_v2_cmsv/train.json",
       "encodingFormat": "application/json",
-      "contentSize": "19062672",
-      "sha256": "0bcd812918a85f54355b8e2a6f3ddb8bc4bb63443e5f55d9fa177ebc63434684"
+      "contentSize": "49155643",
+      "sha256": "eb4ce0c7f975158ff9c987f072959b1ef69f02294e68bb039e4d46cbeb851241"
     },
     {
       "@type": "cr:FileObject",
       "@id": "vqa_val_json",
       "name": "val.json",
-      "description": "VQA-AS val split annotations; 12199 records. Raw images are not included.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vqa/val.json",
+      "description": "VQA v2-CMSV val split annotations; 12199 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/data/vqa_v2_cmsv/val.json",
       "encodingFormat": "application/json",
       "contentSize": "2384637",
       "sha256": "702400c28c38135d18e140b30edd45cee590bc5272b04544c28b50f069c6ebcc"
@@ -112,8 +120,8 @@
       "@type": "cr:FileObject",
       "@id": "vqa_test_json",
       "name": "test.json",
-      "description": "VQA-AS test split annotations; 12199 records. Raw images are not included.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vqa/test.json",
+      "description": "VQA v2-CMSV test split annotations; 12199 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/data/vqa_v2_cmsv/test.json",
       "encodingFormat": "application/json",
       "contentSize": "2753670",
       "sha256": "3d143faf31d04f03c0002466eb6941a1eb4e391f73f5e3ec6ddefd848ae93653"
@@ -122,8 +130,8 @@
       "@type": "cr:FileObject",
       "@id": "gqa_train_jsonl",
       "name": "train.jsonl",
-      "description": "GQA-AS train split annotations; 8007 records. Raw images are not included.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/gqa/train.jsonl",
+      "description": "GQA-CMSV train split annotations; 8007 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/data/gqa_cmsv/train.jsonl",
       "encodingFormat": "application/jsonlines",
       "contentSize": "2937802",
       "sha256": "dbd2b8f3e0d4a07cd962d3bbbdb0b9aca4eeee6c4ab99db88817895834d717a4"
@@ -132,8 +140,8 @@
       "@type": "cr:FileObject",
       "@id": "gqa_val_jsonl",
       "name": "val.jsonl",
-      "description": "GQA-AS val split annotations; 1010 records. Raw images are not included.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/gqa/val.jsonl",
+      "description": "GQA-CMSV val split annotations; 1010 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/data/gqa_cmsv/val.jsonl",
       "encodingFormat": "application/jsonlines",
       "contentSize": "370643",
       "sha256": "8d5135fc6637a5b059a41b77aac15201a28d5a88938a69d8f339feac16fb9546"
@@ -142,8 +150,8 @@
       "@type": "cr:FileObject",
       "@id": "gqa_test_jsonl",
       "name": "test.jsonl",
-      "description": "GQA-AS test split annotations; 983 records. Raw images are not included.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/gqa/test.jsonl",
+      "description": "GQA-CMSV test split annotations; 983 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/data/gqa_cmsv/test.jsonl",
       "encodingFormat": "application/jsonlines",
       "contentSize": "360844",
       "sha256": "fa998ef8b1ec479034b3a16f6d06610460394a1de08ebb0be87067d0da06bc86"
@@ -152,8 +160,8 @@
       "@type": "cr:FileObject",
       "@id": "vg_train_jsonl",
       "name": "train.jsonl",
-      "description": "VG-AS train split annotations; 8002 records. Raw images are not included.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vg/train.jsonl",
+      "description": "VG-CMSV train split annotations; 8002 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/data/vg_cmsv/train.jsonl",
       "encodingFormat": "application/jsonlines",
       "contentSize": "2954202",
       "sha256": "039f094b6ddfd3a84dd974abf5d0f79b17fc2da1346c7be7f92a7d5528002543"
@@ -162,8 +170,8 @@
       "@type": "cr:FileObject",
       "@id": "vg_val_jsonl",
       "name": "val.jsonl",
-      "description": "VG-AS val split annotations; 996 records. Raw images are not included.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vg/val.jsonl",
+      "description": "VG-CMSV val split annotations; 996 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/data/vg_cmsv/val.jsonl",
       "encodingFormat": "application/jsonlines",
       "contentSize": "368017",
       "sha256": "e64e940e548f55895ae19de6bdedec6159413ae2e15cd2616da34a7aee21b653"
@@ -172,8 +180,8 @@
       "@type": "cr:FileObject",
       "@id": "vg_test_jsonl",
       "name": "test.jsonl",
-      "description": "VG-AS test split annotations; 1002 records. Raw images are not included.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vg/test.jsonl",
+      "description": "VG-CMSV test split annotations; 1002 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/data/vg_cmsv/test.jsonl",
       "encodingFormat": "application/jsonlines",
       "contentSize": "369928",
       "sha256": "a1e018d4b999f350b4bbded72006001225e4239c43a909c6127ddd43d3688fc7"
@@ -182,8 +190,8 @@
       "@type": "cr:FileObject",
       "@id": "vqa_mask_npz",
       "name": "vqa_masks.npz",
-      "description": "VQA-AS filtered patch-mask NPZ metadata; 69884 rows and coverage shape (69884, 24, 24).",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/masks/vqa_masks.npz",
+      "description": "VQA v2-CMSV filtered patch-mask NPZ metadata; 69884 rows and coverage shape (69884, 24, 24).",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/masks/vqa_v2_cmsv_masks.npz",
       "encodingFormat": "application/octet-stream",
       "contentSize": "13074117",
       "sha256": "0b3dc0c629b96398557461f1353b9daaa0451ca2aed9af7fbd13308be73037af"
@@ -192,8 +200,8 @@
       "@type": "cr:FileObject",
       "@id": "gqa_mask_npz",
       "name": "gqa_masks.npz",
-      "description": "GQA-AS filtered patch-mask NPZ metadata; 5461 rows and coverage shape (5461, 24, 24).",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/masks/gqa_masks.npz",
+      "description": "GQA-CMSV filtered patch-mask NPZ metadata; 5461 rows and coverage shape (5461, 24, 24).",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/masks/gqa_cmsv_masks.npz",
       "encodingFormat": "application/octet-stream",
       "contentSize": "1051666",
       "sha256": "1cab94c93da9b2efce53608e5ae18578b611598b38008894832e108f4ec1bf70"
@@ -202,8 +210,8 @@
       "@type": "cr:FileObject",
       "@id": "vg_mask_npz",
       "name": "vg_masks.npz",
-      "description": "VG-AS filtered patch-mask NPZ metadata; 3772 rows and coverage shape (3772, 24, 24).",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/masks/vg_masks.npz",
+      "description": "VG-CMSV filtered patch-mask NPZ metadata; 3772 rows and coverage shape (3772, 24, 24).",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/masks/vg_cmsv_masks.npz",
       "encodingFormat": "application/octet-stream",
       "contentSize": "1003249",
       "sha256": "42ecad320d3830b0e456ffc800f93fb67732dd7aaf76b6b2bc183271b45e5b64"
@@ -213,17 +221,17 @@
       "@id": "readme_md",
       "name": "README.md",
       "description": "Dataset card and usage notes.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/README.md",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/README.md",
       "encodingFormat": "text/markdown",
-      "contentSize": "3254",
-      "sha256": "7b274c275e7099eb7b7937f4ba8bea135b22924ab0a1d7bbd0a023589e457a2c"
+      "contentSize": "3715",
+      "sha256": "58ba408da02d278de546ceda2756c01dd5d6bc780e6891128516a538cd4ef04d"
     },
     {
       "@type": "cr:FileObject",
       "@id": "notice_md",
       "name": "NOTICE.md",
       "description": "Provenance, upstream-license, image-availability, and anonymity notice.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/NOTICE.md",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/NOTICE.md",
       "encodingFormat": "text/markdown",
       "contentSize": "759",
       "sha256": "de79eb7b17d52f6f913ed81329e9e735a90aa223bfe8396f14b50f942ab9d807"
@@ -233,7 +241,7 @@
       "@id": "license_txt",
       "name": "LICENSE",
       "description": "Custom research-data terms for the derived annotation and mask metadata package.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/LICENSE",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/LICENSE",
       "encodingFormat": "text/plain",
       "contentSize": "483",
       "sha256": "4607468d45f5bc4fe3090c89554c2a331939b58d1ec777240ab8076da3e5df3c"
@@ -243,7 +251,7 @@
       "@id": "citation_cff",
       "name": "CITATION.cff",
       "description": "Citation metadata placeholder for the anonymous submission artifact.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/CITATION.cff",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/CITATION.cff",
       "encodingFormat": "text/plain",
       "contentSize": "154",
       "sha256": "cfeec08e65b75d2919bc9e24eeddf281d0148df367488763d4a13a3e14bc083f"
@@ -253,40 +261,40 @@
       "@id": "manifest_json",
       "name": "manifest.json",
       "description": "Machine-readable file manifest with counts, hashes, and release policy.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/manifest.json",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/manifest.json",
       "encodingFormat": "application/json",
-      "contentSize": "7348",
-      "sha256": "269344f1a5fd518d29fe7c7a6ee8e9c95c06a03486cbf5a46e4b9fc75e6dbe78"
+      "contentSize": "7872",
+      "sha256": "79947846d4c0e5f01c8e3149f1e12e51ee30e4ea50c0c7560dbcd21a4367db55"
     },
     {
       "@type": "cr:FileObject",
       "@id": "summary_json",
       "name": "summary.json",
       "description": "Summary counts and upload-readiness checks.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/metadata/summary.json",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/metadata/summary.json",
       "encodingFormat": "application/json",
-      "contentSize": "2862",
-      "sha256": "fb817ce56e29022f11f589b7f6dd31bdb2dc71547c7e45f64fa1c909401b5388"
+      "contentSize": "3570",
+      "sha256": "819e69443206cbfdeb4ef65ed67db49a51243e8213f6afda1f78673ce5e328e9"
     },
     {
       "@type": "cr:FileObject",
       "@id": "scan_report_json",
       "name": "upload_scan_report.json",
       "description": "Public-release scan report for paths, credentials, and identity leakage.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/metadata/upload_scan_report.json",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/metadata/upload_scan_report.json",
       "encodingFormat": "application/json",
-      "contentSize": "534",
-      "sha256": "ba783a94859154f60e4fffff96bb8ac7c0cb4e2445680e214bfdd4dc053acd02"
+      "contentSize": "539",
+      "sha256": "004cfbb7dcefff1eea682969df4d35fa85c4b0dafa7ab74cebf2e37bf1b499dc"
     },
     {
       "@type": "cr:FileObject",
       "@id": "sanitization_report_json",
       "name": "upload_sanitization_report.json",
       "description": "Detailed sanitization report for split files and mask metadata.",
-      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/metadata/upload_sanitization_report.json",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/metadata/upload_sanitization_report.json",
       "encodingFormat": "application/json",
-      "contentSize": "6785",
-      "sha256": "ed7c8a1e5ab82681182a372881f4489dffefb70012ec6779d9187e2aca04f2db"
+      "contentSize": "7298",
+      "sha256": "58ed2d90f7c2cd74c2b710e70e104e0b7960db36835cbb14c58dc21632d0cd2d"
     }
   ],
   "recordSet": [
@@ -335,23 +343,35 @@
           "@type": "cr:Field",
           "@id": "split_summary/sha256",
           "dataType": "sc:Text"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/data_source_counts",
+          "dataType": "sc:Text"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/mask_supervision_counts",
+          "dataType": "sc:Text"
         }
       ],
       "data": [
         {
           "split_summary/dataset": "vqa",
           "split_summary/split": "train",
-          "split_summary/path": "data/vqa/train.json",
-          "split_summary/records": 97582,
-          "split_summary/answer_type_counts": "{\"number\": 7301, \"other\": 21452, \"yes/no\": 68829}",
+          "split_summary/path": "data/vqa_v2_cmsv/train.json",
+          "split_summary/records": 219562,
+          "split_summary/answer_type_counts": "{\"number\": 16428, \"other\": 48268, \"yes/no\": 154866}",
           "split_summary/qwen_filter_applied_to_json": false,
           "split_summary/raw_images_included": false,
-          "split_summary/sha256": "0bcd812918a85f54355b8e2a6f3ddb8bc4bb63443e5f55d9fa177ebc63434684"
+          "split_summary/sha256": "eb4ce0c7f975158ff9c987f072959b1ef69f02294e68bb039e4d46cbeb851241",
+          "split_summary/data_source_counts": "{\"train_raw_filtered_masked\": 75196, \"train_raw_removed_nomask\": 22386, \"vqa_train2014_nomask\": 121980}",
+          "split_summary/mask_supervision_counts": "{\"none\": 144366, \"sam3_patch_mask\": 75196}"
         },
         {
           "split_summary/dataset": "vqa",
           "split_summary/split": "val",
-          "split_summary/path": "data/vqa/val.json",
+          "split_summary/path": "data/vqa_v2_cmsv/val.json",
           "split_summary/records": 12199,
           "split_summary/answer_type_counts": "{\"number\": 913, \"other\": 2682, \"yes/no\": 8604}",
           "split_summary/qwen_filter_applied_to_json": false,
@@ -361,7 +381,7 @@
         {
           "split_summary/dataset": "vqa",
           "split_summary/split": "test",
-          "split_summary/path": "data/vqa/test.json",
+          "split_summary/path": "data/vqa_v2_cmsv/test.json",
           "split_summary/records": 12199,
           "split_summary/answer_type_counts": "{\"number\": 913, \"other\": 2682, \"yes/no\": 8604}",
           "split_summary/qwen_filter_applied_to_json": false,
@@ -371,7 +391,7 @@
         {
           "split_summary/dataset": "gqa",
           "split_summary/split": "train",
-          "split_summary/path": "data/gqa/train.jsonl",
+          "split_summary/path": "data/gqa_cmsv/train.jsonl",
           "split_summary/records": 8007,
           "split_summary/answer_type_counts": "{\"other\": 4340, \"yes/no\": 3667}",
           "split_summary/qwen_filter_applied_to_json": false,
@@ -381,7 +401,7 @@
         {
           "split_summary/dataset": "gqa",
           "split_summary/split": "val",
-          "split_summary/path": "data/gqa/val.jsonl",
+          "split_summary/path": "data/gqa_cmsv/val.jsonl",
           "split_summary/records": 1010,
           "split_summary/answer_type_counts": "{\"other\": 540, \"yes/no\": 470}",
           "split_summary/qwen_filter_applied_to_json": false,
@@ -391,7 +411,7 @@
         {
           "split_summary/dataset": "gqa",
           "split_summary/split": "test",
-          "split_summary/path": "data/gqa/test.jsonl",
+          "split_summary/path": "data/gqa_cmsv/test.jsonl",
           "split_summary/records": 983,
           "split_summary/answer_type_counts": "{\"other\": 530, \"yes/no\": 453}",
           "split_summary/qwen_filter_applied_to_json": false,
@@ -401,7 +421,7 @@
         {
           "split_summary/dataset": "vg",
           "split_summary/split": "train",
-          "split_summary/path": "data/vg/train.jsonl",
+          "split_summary/path": "data/vg_cmsv/train.jsonl",
           "split_summary/records": 8002,
           "split_summary/answer_type_counts": "{\"number\": 2667, \"other\": 5335}",
           "split_summary/qwen_filter_applied_to_json": false,
@@ -411,7 +431,7 @@
         {
           "split_summary/dataset": "vg",
           "split_summary/split": "val",
-          "split_summary/path": "data/vg/val.jsonl",
+          "split_summary/path": "data/vg_cmsv/val.jsonl",
           "split_summary/records": 996,
           "split_summary/answer_type_counts": "{\"number\": 329, \"other\": 667}",
           "split_summary/qwen_filter_applied_to_json": false,
@@ -421,7 +441,7 @@
         {
           "split_summary/dataset": "vg",
           "split_summary/split": "test",
-          "split_summary/path": "data/vg/test.jsonl",
+          "split_summary/path": "data/vg_cmsv/test.jsonl",
           "split_summary/records": 1002,
           "split_summary/answer_type_counts": "{\"number\": 337, \"other\": 665}",
           "split_summary/qwen_filter_applied_to_json": false,
@@ -505,7 +525,7 @@
       "data": [
         {
           "mask_files/dataset": "vqa",
-          "mask_files/path": "masks/vqa_masks.npz",
+          "mask_files/path": "masks/vqa_v2_cmsv_masks.npz",
           "mask_files/npz_rows": 69884,
           "mask_files/coverage_shape": "69884x24x24",
           "mask_files/grid_size": 24,
@@ -520,7 +540,7 @@
         },
         {
           "mask_files/dataset": "gqa",
-          "mask_files/path": "masks/gqa_masks.npz",
+          "mask_files/path": "masks/gqa_cmsv_masks.npz",
           "mask_files/npz_rows": 5461,
           "mask_files/coverage_shape": "5461x24x24",
           "mask_files/grid_size": 24,
@@ -535,7 +555,7 @@
         },
         {
           "mask_files/dataset": "vg",
-          "mask_files/path": "masks/vg_masks.npz",
+          "mask_files/path": "masks/vg_cmsv_masks.npz",
           "mask_files/npz_rows": 3772,
           "mask_files/coverage_shape": "3772x24x24",
           "mask_files/grid_size": 24,
@@ -554,7 +574,7 @@
       "@type": "cr:RecordSet",
       "@id": "vqa_train",
       "name": "vqa_train",
-      "description": "VQA-AS train split records from data/vqa/train.json (97582 examples). Raw or masked images are not included in this repository.",
+      "description": "VQA v2-CMSV stage-2 experiment train records from data/vqa_v2_cmsv/train.json (219562 examples). This matches the main SAGE stage-2 training file. Raw or masked images are not included in this repository.",
       "key": {
         "@id": "vqa_train/question_id"
       },
@@ -623,6 +643,32 @@
               "jsonPath": "$[*].answer_type"
             }
           }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_train/data_source",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_train_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].data_source"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_train/mask_supervision",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_train_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].mask_supervision"
+            }
+          }
         }
       ]
     },
@@ -630,7 +676,7 @@
       "@type": "cr:RecordSet",
       "@id": "vqa_val",
       "name": "vqa_val",
-      "description": "VQA-AS val split records from data/vqa/val.json (12199 examples). Raw or masked images are not included in this repository.",
+      "description": "VQA v2-CMSV val split records from data/vqa_v2_cmsv/val.json (12199 examples). Raw or masked images are not included in this repository.",
       "key": {
         "@id": "vqa_val/question_id"
       },
@@ -706,7 +752,7 @@
       "@type": "cr:RecordSet",
       "@id": "vqa_test",
       "name": "vqa_test",
-      "description": "VQA-AS test split records from data/vqa/test.json (12199 examples). Raw or masked images are not included in this repository.",
+      "description": "VQA v2-CMSV test split records from data/vqa_v2_cmsv/test.json (12199 examples). Raw or masked images are not included in this repository.",
       "key": {
         "@id": "vqa_test/question_id"
       },
@@ -782,7 +828,7 @@
       "@type": "cr:RecordSet",
       "@id": "gqa_train",
       "name": "gqa_train",
-      "description": "GQA-AS train split records from data/gqa/train.jsonl (8007 examples). Raw or masked images are not included in this repository.",
+      "description": "GQA-CMSV train split records from data/gqa_cmsv/train.jsonl (8007 examples). Raw or masked images are not included in this repository.",
       "key": {
         "@id": "gqa_train/question_id"
       },
@@ -927,7 +973,7 @@
       "@type": "cr:RecordSet",
       "@id": "gqa_val",
       "name": "gqa_val",
-      "description": "GQA-AS val split records from data/gqa/val.jsonl (1010 examples). Raw or masked images are not included in this repository.",
+      "description": "GQA-CMSV val split records from data/gqa_cmsv/val.jsonl (1010 examples). Raw or masked images are not included in this repository.",
       "key": {
         "@id": "gqa_val/question_id"
       },
@@ -1072,7 +1118,7 @@
       "@type": "cr:RecordSet",
       "@id": "gqa_test",
       "name": "gqa_test",
-      "description": "GQA-AS test split records from data/gqa/test.jsonl (983 examples). Raw or masked images are not included in this repository.",
+      "description": "GQA-CMSV test split records from data/gqa_cmsv/test.jsonl (983 examples). Raw or masked images are not included in this repository.",
       "key": {
         "@id": "gqa_test/question_id"
       },
@@ -1217,7 +1263,7 @@
       "@type": "cr:RecordSet",
       "@id": "vg_train",
       "name": "vg_train",
-      "description": "VG-AS train split records from data/vg/train.jsonl (8002 examples). Raw or masked images are not included in this repository.",
+      "description": "VG-CMSV train split records from data/vg_cmsv/train.jsonl (8002 examples). Raw or masked images are not included in this repository.",
       "key": {
         "@id": "vg_train/question_id"
       },
@@ -1362,7 +1408,7 @@
       "@type": "cr:RecordSet",
       "@id": "vg_val",
       "name": "vg_val",
-      "description": "VG-AS val split records from data/vg/val.jsonl (996 examples). Raw or masked images are not included in this repository.",
+      "description": "VG-CMSV val split records from data/vg_cmsv/val.jsonl (996 examples). Raw or masked images are not included in this repository.",
       "key": {
         "@id": "vg_val/question_id"
       },
@@ -1507,7 +1553,7 @@
       "@type": "cr:RecordSet",
       "@id": "vg_test",
       "name": "vg_test",
-      "description": "VG-AS test split records from data/vg/test.jsonl (1002 examples). Raw or masked images are not included in this repository.",
+      "description": "VG-CMSV test split records from data/vg_cmsv/test.jsonl (1002 examples). Raw or masked images are not included in this repository.",
       "key": {
         "@id": "vg_test/question_id"
       },
@@ -1652,18 +1698,18 @@
   "prov:wasDerivedFrom": [
     {
       "@id": "https://visualqa.org/",
-      "prov:label": "VQA / VQA-AS derived annotations",
-      "sc:description": "Source-style visual question answering annotations and images used to construct the VQA-AS split metadata."
+      "prov:label": "VQA / VQA v2-CMSV derived annotations",
+      "sc:description": "Source-style visual question answering annotations and images used to construct the VQA v2-CMSV split metadata."
     },
     {
       "@id": "https://cs.stanford.edu/people/dorarad/gqa/",
-      "prov:label": "GQA / GQA-AS derived annotations",
-      "sc:description": "Source-style visual reasoning annotations and images used to construct the GQA-AS split metadata."
+      "prov:label": "GQA / GQA-CMSV derived annotations",
+      "sc:description": "Source-style visual reasoning annotations and images used to construct the GQA-CMSV split metadata."
     },
     {
       "@id": "https://homes.cs.washington.edu/~ranjay/visualgenome/",
-      "prov:label": "Visual Genome / Visual Genome-AS derived annotations",
-      "sc:description": "Source-style dense image annotations and question-answer examples used to construct the Visual Genome-AS split metadata."
+      "prov:label": "Visual Genome / VG-CMSV derived annotations",
+      "sc:description": "Source-style dense image annotations and question-answer examples used to construct the VG-CMSV split metadata."
     },
     {
       "@id": "https://cocodataset.org/",
@@ -1678,12 +1724,12 @@
         "@id": "https://www.wikidata.org/wiki/Q5227332"
       },
       "prov:label": "Shortcut-bias split construction and sanitization",
-      "sc:description": "Prepared train/validation/test JSON and JSONL splits for VQA-AS, GQA-AS, and Visual Genome-AS; preserved Qwen-filtered questions in JSON/JSONL split files; removed local absolute paths and machine-specific identifiers from public metadata.",
+      "sc:description": "Prepared train/validation/test JSON and JSONL splits for VQA v2-CMSV, GQA-CMSV, and VG-CMSV; preserved Qwen-filtered questions in JSON/JSONL split files; removed local absolute paths and machine-specific identifiers from public metadata.",
       "prov:wasAttributedTo": [
         {
           "@type": "prov:SoftwareAgent",
           "@id": "sage_as_preparation_pipeline",
-          "prov:label": "SAGE-AS preparation pipeline",
+          "prov:label": "VQA-CMSV Benchmark preparation pipeline",
           "sc:description": "Local preprocessing scripts used to assemble, split, filter, and sanitize the derived benchmark package."
         }
       ]
@@ -1737,7 +1783,7 @@
       ]
     }
   ],
-  "rai:dataLimitations": "SAGE-AS is a derived research benchmark for studying shortcut bias and mask-supervised gating in visual question answering. It contains annotation splits and patch-level mask metadata, but it does not include raw or masked images; users must obtain the corresponding upstream images separately. The benchmark is limited to English-language VQA-style questions derived from VQA-AS, GQA-AS, and Visual Genome-AS style sources, and should not be treated as a general-purpose VQA benchmark or as evidence of deployment readiness. The mask NPZ files are intended for research supervision/analysis only; they were filtered for the training setup and are not exhaustive object or semantic segmentation labels. Because image paths for some splits are sanitized placeholders, users must reconstruct image access from the upstream datasets and verify compatibility with their local data layout.",
+  "rai:dataLimitations": "VQA-CMSV Benchmark is a derived research benchmark for studying shortcut bias and mask-supervised gating in visual question answering. It contains annotation splits and patch-level mask metadata, but it does not include raw or masked images; users must obtain the corresponding upstream images separately. The benchmark is limited to English-language VQA-style questions derived from VQA v2-CMSV, GQA-CMSV, and VG-CMSV style sources, and should not be treated as a general-purpose VQA benchmark or as evidence of deployment readiness. The mask NPZ files are intended for research supervision/analysis only; they were filtered for the training setup and are not exhaustive object or semantic segmentation labels. Because image paths for some splits are sanitized placeholders, users must reconstruct image access from the upstream datasets and verify compatibility with their local data layout.",
   "rai:dataBiases": "The data inherits selection, annotation, language, geographic, object-category, and scene-composition biases from the upstream VQA/GQA/Visual Genome and COCO-like image sources. It also inherits biases introduced by the shortcut construction pipeline, generated/re-written question-answer fields, Qwen-based filtering decisions, and SAM/patch-mask generation. The distribution intentionally emphasizes shortcut-sensitive examples, so model behavior measured on this benchmark may not reflect performance on ordinary VQA traffic. Number-answer rows are excluded only from the released mask NPZ files used for mask-supervision metadata; the corresponding QA records remain in the JSON/JSONL train, validation, and test splits. As a result, mask-supervision analyses using these NPZ files underrepresent number-type questions, while the annotation splits still retain number-answer examples.",
   "rai:personalSensitiveInformation": "No personal or sensitive information was intentionally collected for this derived release, and the repository does not include raw images. However, the upstream image datasets may contain people, faces, locations, or other incidental sensitive visual content, and question/answer annotations may refer to visible attributes such as age, gender expression, clothing, activities, or scene context. Users must comply with upstream dataset terms and should perform their own privacy and sensitivity review before redistributing images or using the benchmark in settings involving people or sensitive attributes.",
   "rai:dataUseCases": "Intended use cases are academic research and evaluation of shortcut bias, answer-shortcut reliance, robustness of vision-language models, and training or analysis of patch-level mask/gating supervision for VQA. Validated use in this release is benchmark-style offline evaluation and controlled research training with the provided splits and mask metadata. The dataset is not validated for production model deployment, surveillance, biometric inference, user profiling, safety-critical decision making, clinical or legal use, or broad measurement of visual reasoning ability outside the shortcut-bias setting.",

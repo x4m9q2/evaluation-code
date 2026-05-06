@@ -1,325 +1,569 @@
-# SAGE Repro Bundle
+# VQA-CMSV / SAGE 匿名复现代码
 
-This directory collects the SAGE reproduction code, scripts, comparison baselines, and selected JSON/NPZ metadata used in the current project.
+本仓库是 VQA-CMSV benchmark 生成流程和 SAGE 实验的匿名代码包。推荐入口是
+根目录下的 `scripts/`，这些脚本使用相对路径解析仓库位置；组件目录内的历史
+脚本主要用于溯源和排查，不建议作为完整复现实验的启动入口。
 
-It is organized so training/evaluation scripts use paths relative to this bundle. Large image files and model weights are not embedded; place them into the empty placeholder directories below before running.
+本仓库不包含大文件资产：模型权重、原始图片、训练 checkpoint、优化器状态、
+生成输出、SAM3 权重、Qwen 权重和 xVerify 权重均需要单独下载。
 
-- LLaVA-v1.5 base weights: `models/llava-v1.5-7b/`
-- CLIP vision tower: `models/clip-vit-large-patch14-336/`
-- xVerify weights for Acc/SR evaluation: `models/xVerify-0.5B-I/`
-- SAM3 checkpoint: `models/sam3_ckpt/sam3.pt`
-- Gemma 3 model weights: `models/Gemma-3-4B-IT/`
-- SigLIP text encoder weights for the gate: `models/siglip-so400m-patch14-384/`
-- Gemma image root: `data/playground_data/`
-- LLaVA/SAGE image root: `data/images/`
-- Optional Gemma-local xVerify mirror: `code/gemma_gate/x_verify/xVerify-0.5B-I/`
+除 `third_party/` 下的第三方说明外，仓库内运行相关 README 已合并到本文档。
+`data/sage_as/README.md` 是 Hugging Face 数据集卡片的本地副本，保留用于数据
+集说明，不作为代码运行入口。
 
-## Structure
+## 1. 环境配置
 
-- `code/gemma_gate/`: main Gemma 3 gate/SAGE training and evaluation implementation.
-- `code/beaf_causalmm/`: BEAF/CausalMM-style comparison implementation for Gemma 3.
-- `code/napo_gemma_debug/`: Gemma NaPO adaptation/debug scripts.
-- `code/llava_sage/`: LLaVA-v1.5 SAGE implementation, including pretraining, mask-supervised finetuning, inference, POPE/BEAF hooks, and Acc/SR scripts.
-- `third_party/napo_llava_ref/`: LLaVA NaPO comparison reference snapshot kept separate from the core SAGE code.
-- `code/data_tools/`: shortcut, mask-generation, mask-filtering, and dataset-construction utilities.
-- `code/evaluation/`: POPE, BEAF/CausalMM, xVerify, and shortcut metric code.
-- `data/`: JSON/NPZ training and evaluation data, plus empty image placeholders.
-- `models/`: empty model-weight placeholders.
-- `scripts/`: bundle-level run scripts with relative data paths.
-- `docs/`: manifest and RoPE notes.
-- `checkpoints/`, `logs/`, `outputs/`: default local output directories.
+验证过的环境如下：
 
-Use the top-level `scripts/` directory for reproducible runs.
+- Python 3.10
+- PyTorch 2.6.0，CUDA 12.4 runtime
+- Transformers 4.51.3
+- DeepSpeed 0.16.7
+- bf16 训练
+- SDPA 或 eager attention；FlashAttention2 可选
 
-For the offline preprocessing chain that builds `mask -> Qwen filter -> final training JSON/NPZ`
-artifacts for VQA, GQA, and VG, see
-`docs/MASK_QWEN_PACKAGING_PIPELINE.md`.
-
-For the LLaVA/SAGE submission code path, start with:
-
-```bash
-bash scripts/run_all_llava_sage_pipeline.sh
-```
-
-Top-level scripts are dry-run by default. Set `DRY_RUN=0` to execute long jobs. See `docs/LLAVA_SAGE_REPRO.md` for details.
-
-## Training Parameter Stability
-
-The LLaVA stage-2 SAGE scripts intentionally keep the original stable training
-batch structure: ZeRO-1 bf16, `PER_DEVICE_TRAIN_BATCH_SIZE=32`,
-`GRADIENT_ACCUMULATION_STEPS=1`, and 4 GPUs, giving an effective batch size of
-128. Do not change the DeepSpeed stage, per-device batch size, gradient
-accumulation, precision flags, or learning-rate schedule casually. Matching only
-the effective batch size is not necessarily equivalent; unverified combinations
-such as smaller micro-batches with larger gradient accumulation or ZeRO-2 may
-trigger numerical instability or NaN losses.
-
-If these parameters must be changed for memory reasons, first run a short smoke
-test with frequent logging and verify that training loss, validation loss, and
-saved checkpoints are normal before launching a full run.
-
-For this bundle, use 20-step smoke tests instead of 1-step probes. One step only
-checks that the process starts; 20 steps are enough to expose common NaN/Inf,
-data-loading, optimizer, scheduler, and checkpoint-save problems while still
-remaining cheap.
-
-The filtered LLaVA pretraining JSON can be regenerated with:
-
-```bash
-bash scripts/run_build_pretrain_json.sh
-```
-
-Place the raw LLaVA mix file at `data/llava_stage1/llava_v1_5_mix665k.json`
-before running that script. The raw file and intermediate generated JSON are
-not included in the compressed release archive.
-
-After LLaVA pretraining, assemble the saved `mm_projector.bin` adapter into a
-directly loadable LLaVA checkpoint with:
-
-```bash
-DRY_RUN=0 bash scripts/run_assemble_llava_checkpoint.sh
-```
-
-The assembler injects projector weights and, when present, SAGE gate weights
-into `models/llava-v1.5-7b/`. It writes the CLIP vision tower path as a relative
-path in the saved config by default.
-
-## Environment
-
-Use one Python environment for both Gemma and LLaVA bundle scripts. The local
-validated environment is named `.venv_gemma`; it uses Python 3.10, PyTorch
-2.6.0+cu124, Transformers 4.51.3, and DeepSpeed 0.16.7.
-
-Create it from the bundle root with:
-
-```bash
-python3 -m venv .venv_gemma
-source .venv_gemma/bin/activate
-pip install -r code/gemma_gate/gemma/requirements-py310.txt
-```
-
-Or create an equivalent conda environment:
+创建环境：
 
 ```bash
 conda env create -f environment.yml
 conda activate sage-repro
 ```
 
-`code/gemma_gate/requirements-extra.txt` currently contains `flash-attn`. Treat
-it as an optional acceleration/backend dependency; install it only if your CUDA
-toolchain can build or load the matching wheel. The validated smoke tests in
-this bundle used the default SDPA/eager-compatible paths and do not require
-Flash Attention 2 to start.
-
-If you are using a pre-existing environment, verify the launcher stack before a
-long run:
+如果复用本地 virtualenv，显式指定 Python：
 
 ```bash
-$PWD/.venv_gemma/bin/python -c "import torch, transformers, deepspeed; print(torch.__version__, transformers.__version__, deepspeed.__version__)"
+export PYTHON_BIN="$PWD/.venv_gemma/bin/python"
+export PATH="$PWD/.venv_gemma/bin:$PATH"
 ```
 
-Top-level Gemma scripts already launch with `${PYTHON_BIN}`. LLaVA and NaPO
-LLaVA scripts also launch DeepSpeed through `${PYTHON_BIN} -m
-deepspeed.launcher.runner`, so set `PYTHON_BIN` explicitly when using the
-packaged environment:
+通用约定：
 
-```bash
-export PYTHON_BIN=$PWD/.venv_gemma/bin/python
+- 大多数 wrapper 默认 dry run，只打印命令和缺失文件；正式运行时设置
+  `RUN=1` 或 `DRY_RUN=0`。
+- 所有默认路径均相对仓库根目录，可通过环境变量覆盖。
+- 长训练前先跑 20 step smoke test，例如设置 `MAX_STEPS=20` 或
+  `EXTRA_ARGS='--max_steps 20'`。
+- 不要随意改 DeepSpeed stage、per-device batch size、gradient
+  accumulation、precision、学习率调度或 `max_steps`。这些参数会改变数值稳
+  定性和学习率曲线；未验证组合可能触发 NaN/Inf。
+- 如果下载时需要代理，只在当前 shell 设置代理环境变量，不要把本地代理地址
+  或凭证提交进仓库。
+
+## 2. 数据集生成
+
+### 2.1 跑数据集生成需要下载的文件
+
+VQA-CMSV 生成需要以下外部文件：
+
+- COCO 2014 train images：`data/images/coco/train2014/`
+- COCO 2014 annotations：`annotations/instances_train2014.json`
+- VQAv2 train questions：
+  `data/detect-shortcuts/data/vqa2/v2_OpenEnded_mscoco_train2014_questions.json`
+- VQAv2 train annotations：
+  `data/detect-shortcuts/data/vqa2/v2_mscoco_train2014_annotations.json`
+- shortcut mining 使用的 GMiner：
+  `code/shortcut_pipeline/bin/GMiner`
+- shortcut matching 使用的 CUDA matcher：
+  `code/shortcut_pipeline/bin/cuda`
+
+官方下载入口：
+
+```text
+http://images.cocodataset.org/annotations/annotations_trainval2014.zip
+http://images.cocodataset.org/zips/train2014.zip
+https://visualqa.org/download.html
 ```
 
-For direct ad-hoc commands outside the wrappers, also put the environment first
-on `PATH` so `python`, `pip`, and `deepspeed` agree:
+已发布的数据集可从 Hugging Face 下载：
 
-```bash
-export PATH=$PWD/.venv_gemma/bin:$PATH
+```text
+https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark
+https://huggingface.co/datasets/as-benchmark-artifacts/vqa-cmsv-benchmark/resolve/main/croissant.json
 ```
 
-Alternatively install into your active environment from:
+下载后建议保持如下结构：
 
-```bash
-pip install -r code/gemma_gate/gemma/requirements.txt
+```text
+data/sage_as/
+  data/vqa_v2_cmsv/{train,val,test}.json
+  data/gqa_cmsv/{train,val,test}.jsonl
+  data/vg_cmsv/{train,val,test}.jsonl
+  masks/{vqa_v2_cmsv,gqa_cmsv,vg_cmsv}_masks.npz
 ```
 
-Install `code/gemma_gate/requirements-extra.txt` only when you explicitly want
-Flash Attention 2 support. The scripts default to SDPA/eager-compatible
-attention paths. Override `ATTN_IMPLEMENTATION=eager` if your current
-environment has SDPA issues.
+### 2.2 跑数据集生成的流程
 
-## Pretraining
-
-Default data:
-
-- `data/pretrain_llava_v1_5_mix665k_single_noocr_max200_imageonly_strict_noocr.json`
-- `data/playground_data/` as image root
-
-Run:
+阶段一：挖掘文本捷径规则和候选匹配结果。
 
 ```bash
-cd /path/to/sage_repro_bundle
+RUN=1 bash scripts/run_shortcut_stage1.sh
+```
+
+阶段二：基于阶段一结果生成 CMSV 样本。
+
+```bash
+RUN=1 bash scripts/run_shortcut_stage2.sh
+```
+
+格式转换：将生成结果转换为发布用 VQA v2-CMSV split。
+
+```bash
+RUN=1 BATCH_OUTPUT_JSONL=outputs/shortcut_stage2/generated_samples.jsonl \
+  bash scripts/run_build_vqa_v2_cmsv_splits.sh
+```
+
+如果只需要复现实验、不重新生成数据，可直接下载发布版 split：
+
+```bash
+RUN=1 bash scripts/run_download_vqa_v2_cmsv.sh
+```
+
+split 语义：
+
+- `train`：训练 split。VQA v2-CMSV 的 train 是主实验二阶段训练 mix，包含
+  带 mask 的 CMSV 样本、保留但无 mask 的 CMSV 样本和 VQA train2014
+  no-mask 样本。
+- `val`：二阶段训练验证 loss 使用的 split。
+- `test`：Acc/SR 测评使用的 split。
+
+当前代码以 Hugging Face 发布格式为准，不再维护旧本地格式兼容。训练时通过
+NPZ 中的 `question_id` 匹配样本是否启用 mask loss。
+
+## 3. LLaVA 实验
+
+### 3.1 跑 LLaVA 所有实验需要准备的文件
+
+必需模型和组件：
+
+- `models/llava-v1.5-7b/`
+- `models/clip-vit-large-patch14-336/`
+- `models/sam3_ckpt/sam3.pt`，仅生成 mask 时需要
+
+必需数据：
+
+- LLaVA stage-1 原始 mix：
+  `data/llava_stage1/llava_v1_5_mix665k.json`
+- LLaVA stage-1 图片根目录：`data/playground_data/`
+- VQA/GQA/VG CMSV split 和 mask：`data/sage_as/`
+- 评测图片根目录：`data/images/`
+
+可选依赖：
+
+- Qwen 模型或 API：用于视觉线索过滤。
+- POPE 数据：`data/pope/`
+- BEAF 数据：`data/beaf/`
+- xVerify 不随仓库分发，打包后的 Acc/SR 脚本不依赖 xVerify。
+
+### 3.2 跑 LLaVA 所有实验的流程和注意事项
+
+#### 3.2.1 一阶段训练数据预处理
+
+生成 image-only、no-OCR、答案长度受限的 LLaVA 预训练 JSON：
+
+```bash
+RUN=1 bash scripts/run_build_pretrain_json.sh
+```
+
+默认输出：
+
+```text
+data/pretrain_llava_v1_5_mix665k_single_noocr_max200_imageonly_strict_noocr.json
+```
+
+#### 3.2.2 开启门控的一阶段训练
+
+```bash
+DRY_RUN=0 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 \
+OUTPUT_DIR=checkpoints/llava_pretrain_gate \
+bash scripts/run_llava_pretrain_gate.sh
+```
+
+关键默认参数：
+
+- `--use_dual_input_gate True`
+- `--tune_mm_mlp_adapter True`
+- DeepSpeed `code/llava_sage/scripts/zero2_bf16.json`
+- bf16
+- `learning_rate=1e-3`
+
+#### 3.2.3 关闭门控的一阶段训练
+
+```bash
+DRY_RUN=0 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 \
+OUTPUT_DIR=checkpoints/llava_pretrain_nogate \
+bash scripts/run_llava_pretrain_nogate.sh
+```
+
+该脚本与门控版使用相同预训练数据和优化配置，只关闭门控和 L1 相关项。
+
+#### 3.2.4 模型组装
+
+如果一阶段只保存 projector 或 gate adapter，需要组装成可直接加载的 LLaVA
+checkpoint：
+
+```bash
+DRY_RUN=0 \
+ASSEMBLE_ADAPTER_PATH=checkpoints/llava_pretrain_gate/mm_projector.bin \
+ASSEMBLE_OUTPUT_PATH=checkpoints/llava_pretrain_gate_assembled \
+bash scripts/run_assemble_llava_checkpoint.sh
+```
+
+`ASSEMBLE_FORCE_GATE=auto` 会自动检测 adapter 中是否包含 gate 权重。
+
+#### 3.2.5 Qwen 过滤数据
+
+Qwen 过滤用于判断 mask supervision 是否可靠：
+
+```bash
+RUN=1 bash scripts/run_qwen_visual_cue_filter.sh vqa
+RUN=1 bash scripts/run_qwen_visual_cue_filter.sh gqa
+RUN=1 bash scripts/run_qwen_visual_cue_filter.sh vg
+```
+
+Qwen 过滤只影响 NPZ mask rows 和训练时是否启用 mask loss，不删除 JSON/JSONL
+中的 QA 样本。
+
+#### 3.2.6 掩码 NPZ 生成
+
+VQA mask 生成、过滤和打包：
+
+```bash
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh vqa-generate
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh vqa-filter
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh vqa-build
+```
+
+GQA/VG mask 生成、过滤和打包：
+
+```bash
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh gqa-vg-generate
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh gqa-vg-filter
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh gqa-vg-build
+```
+
+mask 规则：
+
+- 训练时以 NPZ 中的 `question_id` 匹配作为 mask supervision 的依据。
+- JSON/JSONL 中的 `mask_supervision` 只是可读 metadata，不是唯一依据。
+- number-answer 样本不会从 QA split 删除，只会从 NPZ 中移除对应 mask row，
+  或在训练时视作 no-mask supervision。
+
+#### 3.2.7 二阶段训练
+
+门控 SAGE：
+
+```bash
+DRY_RUN=0 \
+SAGE_AS_DATASET=vqa \
+LLAVA_PRETRAIN_PROJECTOR=checkpoints/llava_pretrain_gate/mm_projector.bin \
+LLAVA_STAGE2_CHECKPOINT=checkpoints/llava_stage2_sage_vqa \
+bash scripts/run_llava_stage2_mask_sft.sh
+```
+
+非门控对照：
+
+```bash
+DRY_RUN=0 \
+SAGE_AS_DATASET=vqa \
+LLAVA_STAGE2_NOGATE_CHECKPOINT=checkpoints/llava_stage2_nogate_vqa \
+bash scripts/run_llava_stage2_mask_sft_nogate.sh
+```
+
+可把 `SAGE_AS_DATASET` 改为 `gqa` 或 `vg`。当前 LLaVA 二阶段默认训练 2
+epoch，并使用 `LR_SCHEDULER_TOTAL_STEPS_SCALE=1.5`，使学习率曲线对齐原
+3 epoch 训练的前 2 epoch。不要用改 `max_steps` 的方式替代正式训练，否则
+学习率调度不等价。验证集 loss 默认按 epoch 评估。
+
+#### 3.2.8 Acc/SR 测评
+
+LLaVA Acc/SR wrapper 支持 VQA、GQA 和 VG：
+
+```bash
+DRY_RUN=0 \
+LLAVA_EVAL_DATASET=vqa \
+MODEL_PATH=checkpoints/llava_stage2_sage_vqa \
+bash scripts/run_llava_eval_acc_sr.sh
+```
+
+常用覆盖项：
+
+- `LLAVA_EVAL_DATASET=vqa|gqa|vg`
+- `MODEL_PATH=...`
+- `HAS_GATE=auto|true|false`
+- `TORCH_DTYPE=bf16`
+- `LIMIT=100` 用于 smoke test
+
+#### 3.2.9 NaPO 跑法
+
+构建 LLaVA NaPO preference 数据：
+
+```bash
+RUN=1 SAGE_AS_DATASET=vqa bash scripts/run_build_shortcut_napo_llava_dataset.sh
+```
+
+启动 NaPO：
+
+```bash
+DRY_RUN=0 \
+SAGE_AS_DATASET=vqa \
+NAPO_LLAVA_OUTPUT_ROOT=checkpoints/napo_llava_vqa \
+bash scripts/run_napo_llava.sh
+```
+
+NaPO 数据约定：负样本使用 `original_answer`，正样本使用
+`generated_answer`。
+
+#### 3.2.10 CausalMM
+
+CausalMM 在 CMSV test split 上做 plug-and-play 推理：
+
+```bash
+DRY_RUN=0 \
+LLAVA_EVAL_DATASET=vqa \
+MODEL_PATH=models/llava-v1.5-7b \
+bash scripts/run_cmsv_causalmm_llava.sh
+```
+
+可把 `LLAVA_EVAL_DATASET` 改为 `gqa` 或 `vg`。该流程与 POPE/BEAF 无关，也
+不依赖 xVerify。
+
+#### 3.2.11 BEAF 和 POPE
+
+普通 SAGE/LLaVA POPE：
+
+```bash
+DRY_RUN=0 \
+MODEL_PATH=checkpoints/llava_stage2_sage_vqa \
+bash scripts/run_pope_eval.sh
+```
+
+CausalMM-LLaVA POPE：
+
+```bash
+DRY_RUN=0 \
+MODEL_PATH=models/llava-v1.5-7b \
+bash scripts/run_pope_causalmm_llava.sh
+```
+
+BEAF：
+
+```bash
+DRY_RUN=0 \
+MODEL_PATH=checkpoints/llava_stage2_sage_vqa \
+bash scripts/run_beaf_eval.sh
+```
+
+POPE/BEAF 的原始数据和图片不随仓库分发，需要按官方协议单独获取。
+
+## 4. Gemma 实验
+
+### 4.1 跑 Gemma 所有实验需要准备的文件
+
+必需模型：
+
+- `models/Gemma-3-4B-IT/`
+- `models/siglip-so400m-patch14-384/`
+
+必需数据：
+
+- 预训练 JSON：
+  `data/pretrain_llava_v1_5_mix665k_single_noocr_max200_imageonly_strict_noocr.json`
+- 预训练图片根目录：`data/playground_data/`
+- VQA/GQA/VG CMSV split 和 mask：`data/sage_as/`
+- 二阶段图片根目录：`data/images/`
+
+可选依赖：
+
+- Qwen 模型或 API：用于过滤 mask supervision。
+- NaPO 训练数据：可由本仓库脚本从 CMSV split 构建。
+- CausalMM 评测输入：由 CMSV test split 转换得到。
+
+### 4.2 跑 Gemma 所有实验的流程和注意事项
+
+#### 4.2.1 一阶段训练数据预处理
+
+Gemma 与 LLaVA 复用同一个预训练 JSON：
+
+```bash
+RUN=1 bash scripts/run_build_pretrain_json.sh
+```
+
+#### 4.2.2 开启门控的一阶段训练
+
+```bash
+RUN=1 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 \
+PRETRAIN_CHECKPOINT=checkpoints/gemma3_4b_pretrain_gate_projector_l1_sdpa \
 bash scripts/run_pretrain_gate.sh
 ```
 
-Useful overrides:
+默认使用 bf16、SDPA、4 GPU、`learning_rate=1e-3`。smoke test：
 
 ```bash
-PER_DEVICE_TRAIN_BATCH_SIZE=16 GRADIENT_ACCUMULATION_STEPS=2 SAVE_STEPS=2500 REPORT_TO=wandb bash scripts/run_pretrain_gate.sh
+RUN=1 MAX_STEPS=20 bash scripts/run_pretrain_gate.sh
 ```
 
-20-step gate smoke:
+#### 4.2.3 关闭门控的一阶段训练
 
 ```bash
-PYTHON_BIN=$PWD/.venv_gemma/bin/python CUDA_VISIBLE_DEVICES=0,1,2,3 \
-RUN_NAME=smoke20_gemma_pretrain_gate_main_equiv \
-OUTPUT_DIR=$PWD/checkpoints/smoke20_gemma_pretrain_gate_main_equiv \
-LOG_FILE=$PWD/logs/smoke20_gemma_pretrain_gate_main_equiv.log \
-MAX_STEPS=20 SAVE_STEPS=20 DATALOADER_NUM_WORKERS=0 REPORT_TO=none \
-bash scripts/run_pretrain_gate.sh
-```
-
-Non-gated pretraining keeps the same data, optimizer, scheduler, batch, and
-freeze settings, but disables the question-guided gate and L1 loss:
-
-```bash
+RUN=1 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 \
+PRETRAIN_NOGATE_CHECKPOINT=checkpoints/gemma3_4b_pretrain_projector_sdpa \
 bash scripts/run_pretrain_nogate.sh
 ```
 
-20-step non-gated smoke:
+该脚本不启用门控，不启用 L1 loss，其余预训练配置尽量与门控版一致。
+
+#### 4.2.4 模型组装
+
+Gemma 默认 full fine-tuning 脚本会直接保存可加载 checkpoint，通常不需要额外
+组装。若使用 LoRA 或 adapter-only 变体，应按对应上游 Gemma fine-tuning 工
+具执行 merge。
+
+#### 4.2.5 Qwen 过滤数据
+
+Gemma 与 LLaVA 使用同一套 Qwen 过滤结果和 NPZ mask：
 
 ```bash
-PYTHON_BIN=$PWD/.venv_gemma/bin/python CUDA_VISIBLE_DEVICES=0,1,2,3 \
-RUN_NAME=smoke20_gemma_pretrain_nogate_main_equiv \
-OUTPUT_DIR=$PWD/checkpoints/smoke20_gemma_pretrain_nogate_main_equiv \
-LOG_FILE=$PWD/logs/smoke20_gemma_pretrain_nogate_main_equiv.log \
-MAX_STEPS=20 SAVE_STEPS=20 DATALOADER_NUM_WORKERS=0 REPORT_TO=none \
-bash scripts/run_pretrain_nogate.sh
+RUN=1 bash scripts/run_qwen_visual_cue_filter.sh vqa
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh vqa-build
 ```
 
-## Stage-2 SFT
+过滤语义同 LLaVA：只影响 NPZ mask rows 和 mask loss 是否启用，不删除 QA
+样本。
 
-Stage-2 starts from `checkpoints/gemma3_4b_pretrain_gate_projector_l1_sdpa`.
+#### 4.2.6 掩码 NPZ 生成
+
+Gemma 读取 `PATCH_MASK_ANALYSIS_PATH` 指向的 NPZ，并通过 `question_id`
+匹配训练样本：
 
 ```bash
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh vqa-generate
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh vqa-build
+```
+
+GQA/VG：
+
+```bash
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh gqa-vg-generate
+RUN=1 bash scripts/run_mask_generation_and_filtering.sh gqa-vg-build
+```
+
+#### 4.2.7 二阶段训练
+
+门控 SAGE：
+
+```bash
+RUN=1 \
+SAGE_AS_DATASET=vqa \
+PRETRAIN_CHECKPOINT=checkpoints/gemma3_4b_pretrain_gate_projector_l1_sdpa \
+STAGE2_CHECKPOINT=checkpoints/gemma3_4b_stage2_gate_l1_mask_sdpa_vqa \
 bash scripts/run_stage2_sft_gate.sh
 ```
 
-Default data:
-
-- `data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa.json`
-- `data/stage2/patch_mask_analysis_train_raw_qwenkeep_sam3_compat.npz`
-- `data/playground_data/coco/train2014`
-
-20-step gate smoke:
+非门控对照：
 
 ```bash
-PYTHON_BIN=$PWD/.venv_gemma/bin/python CUDA_VISIBLE_DEVICES=0,1,2,3 NUM_GPUS=4 \
-RUN_NAME=smoke20_gemma_stage2_gate_main_equiv \
-OUTPUT_DIR=$PWD/checkpoints/smoke20_gemma_stage2_gate_main_equiv \
-LOG_FILE=$PWD/logs/smoke20_gemma_stage2_gate_main_equiv.log \
-MAX_STEPS=20 DATALOADER_NUM_WORKERS=0 REPORT_TO=none \
-EXTRA_ARGS='--save_strategy steps --save_steps 20' \
-bash scripts/run_stage2_sft_gate.sh
-```
-
-Non-gated stage-2 SFT keeps the same data, optimizer, scheduler, and batch
-settings, but disables the gate, L1 loss, and mask-patch loss:
-
-```bash
+RUN=1 \
+SAGE_AS_DATASET=vqa \
+PRETRAIN_NOGATE_CHECKPOINT=checkpoints/gemma3_4b_pretrain_projector_sdpa \
+STAGE2_NOGATE_CHECKPOINT=checkpoints/gemma3_4b_stage2_nogate_sdpa_vqa \
 bash scripts/run_stage2_sft_nogate.sh
 ```
 
-20-step non-gated smoke, using a smoke non-gated pretraining checkpoint:
+可把 `SAGE_AS_DATASET` 改为 `gqa` 或 `vg`。Gemma 二阶段建议先设置
+`MAX_STEPS=20` 做 smoke test，确认预期有监督样本的 `mask_patch_loss` 非 0，
+且总体 loss 为有限值。
+
+#### 4.2.8 Acc/SR 测评
+
+单进程 Gemma 评测：
 
 ```bash
-PYTHON_BIN=$PWD/.venv_gemma/bin/python CUDA_VISIBLE_DEVICES=0,1,2,3 NUM_GPUS=4 \
-RUN_NAME=smoke20_gemma_stage2_nogate_main_equiv \
-MODEL_ID=$PWD/checkpoints/smoke20_gemma_pretrain_nogate_main_equiv/checkpoint-20 \
-OUTPUT_DIR=$PWD/checkpoints/smoke20_gemma_stage2_nogate_main_equiv \
-LOG_FILE=$PWD/logs/smoke20_gemma_stage2_nogate_main_equiv.log \
-MAX_STEPS=20 DATALOADER_NUM_WORKERS=0 REPORT_TO=none \
-EXTRA_ARGS='--save_strategy steps --save_steps 20' \
-bash scripts/run_stage2_sft_nogate.sh
-```
-
-## Evaluation
-
-Run inference on `test_raw_with_shortcut_answer.json` without the extra short-answer system prompt:
-
-```bash
-BATCH_SIZE=16 \
+RUN=1 \
+SAGE_AS_DATASET=vqa \
+MODEL_ID=checkpoints/gemma3_4b_stage2_gate_l1_mask_sdpa_vqa \
 bash scripts/run_eval_test_raw.sh
 ```
 
-4-GPU sharded inference:
+4 GPU 分片推理：
 
 ```bash
-BATCH_SIZE=16 \
+RUN=1 \
+SAGE_AS_DATASET=vqa \
+MODEL_ID=checkpoints/gemma3_4b_stage2_gate_l1_mask_sdpa_vqa \
 bash scripts/run_eval_test_raw_4gpu.sh
 ```
 
-The merged prediction file is written under `outputs/infer_test_raw/<model_name>/`.
+#### 4.2.9 NaPO 跑法
 
-Then run xVerify Acc/SR:
+构建 Gemma NaPO 数据：
 
 ```bash
-INPUT_PATH=/path/to/merged_prediction.json \
-bash scripts/run_xverify_metrics.sh
+RUN=1 SAGE_AS_DATASET=vqa bash scripts/run_build_shortcut_napo_splits.sh
 ```
 
-## NaPO Comparison
-
-The Gemma NaPO entry uses the original Gemma model by default and disables the gate:
+启动 NaPO：
 
 ```bash
-PER_DEVICE_TRAIN_BATCH_SIZE=16 \
-NUM_TRAIN_EPOCHS=3 \
+RUN=1 \
+SAGE_AS_DATASET=vqa \
+NAPO_DATA=data/napo/train_raw_pos_neg_shortcut.json \
 bash scripts/run_napo_shortcut.sh
 ```
 
-20-step NaPO smoke:
+#### 4.2.10 CausalMM
+
+Gemma CausalMM：
 
 ```bash
-PYTHON_BIN=$PWD/.venv_gemma/bin/python CUDA_VISIBLE_DEVICES=0,1,2,3 NUM_GPUS=4 \
-RUN_NAME=smoke20_gemma_napo_main_equiv \
-OUTPUT_DIR=$PWD/checkpoints/smoke20_gemma_napo_main_equiv \
-LOG_FILE=$PWD/logs/smoke20_gemma_napo_main_equiv.log \
-MAX_STEPS=20 DATALOADER_NUM_WORKERS=0 REPORT_TO=none \
-EXTRA_ARGS='--save_strategy steps --save_steps 20' \
-bash scripts/run_napo_shortcut.sh
+RUN=1 \
+SAGE_AS_DATASET=vqa \
+MODEL_PATH=models/Gemma-3-4B-IT \
+bash scripts/run_cmsv_causalmm_gemma.sh
 ```
 
-Default data:
+Gemma 适配默认使用 language-side counterfactual attention：
 
-- `data/napo/train_raw_pos_neg_shortcut.json`
-- `data/playground_data/coco/train2014`
+```text
+causalmm_logits = (1 + gamma) * logits - gamma * cf_logits
+```
 
-The implemented loss path is NaPO-style `dyn_lq` with online reference-model log-probs. The LLaVA NaPO comparison code is kept under `third_party/napo_llava_ref/` as a reference snapshot rather than mixed into the core SAGE code path.
+可通过 `CF_MODE`、`ATTENTION_METHOD`、`GAMMA`、`EPSILON` 覆盖默认设置。
 
-## BEAF / CausalMM Comparison
+## 5. 对所有依赖的协议说明
 
-Run Gemma 3 CausalMM-style counterfactual decoding:
+本仓库只分发匿名代码、配置、小型 metadata 和 wrapper 脚本。使用者需要自行
+下载外部数据、图片、模型权重和评测资源，并遵守对应许可证或使用条款。
+
+主要依赖说明：
+
+- LLaVA 相关代码位于 `code/llava_sage/`；复用时需保留上游许可证和引用信息。
+- Gemma fine-tuning 相关代码位于 `code/gemma_gate/gemma/`；复用时需保留上游
+  许可证和引用信息。Gemma 权重受 Gemma 模型条款约束，本仓库不分发权重。
+- CausalMM-LLaVA 代码位于 `code/evaluation/causalmm_llava/`；许可证文件保留
+  在该目录下，使用时应引用 CausalMM 原论文。
+- Gemma CausalMM 适配代码位于 `code/beaf_causalmm/gemma3/`，是对 CausalMM
+  counterfactual decoding 思路的 Gemma 适配。
+- NaPO 参考实现位于 `third_party/napo_llava_ref/`，作为第三方代码快照保留，
+  需要保留上游说明和许可证。
+- POPE 和 BEAF 是外部幻觉评测资源；本仓库只保留调用脚本，不分发数据。
+- SAM3、Qwen、xVerify 不随仓库分发。Qwen 只用于可选过滤流程；xVerify 不作
+  为本代码包的依赖。
+- VQA-CMSV 数据包只包含派生 QA annotation 和 mask metadata，不包含原始或
+  masked 图片。COCO、VQAv2、GQA、Visual Genome 等上游数据仍受其原始许可
+  证约束。
+
+匿名提交前检查 staged 文件：
 
 ```bash
-bash scripts/run_beaf_causalmm_eval.sh
+git status --short
+rg -n 'secret|credential|private key|personal access|internal host' \
+  --glob '!third_party/**' --glob '!data/sage_as/README.md' .
+git diff --cached --stat
 ```
 
-This writes outputs under `outputs/beaf_causalmm/`.
-
-Small end-to-end smoke:
-
-```bash
-PYTHON_BIN=$PWD/.venv_gemma/bin/python CUDA_VISIBLE_DEVICES=0 NUM_SHARDS=1 \
-MAX_NEW_TOKENS=8 BATCH_SIZE=1 \
-OUT_DIR=$PWD/outputs/beaf_causalmm_smoke2 \
-OUTPUT_FILE=$PWD/outputs/beaf_causalmm_smoke2/gemma3_causalmm_test_raw_smoke2.json \
-bash scripts/run_beaf_causalmm_eval.sh --limit 2
-```
-
-There is no separate file named `BEAF` in the recovered Gemma code. The included comparison code is the Gemma 3 CausalMM/BEAF-style counterfactual decoding bundle that was previously used for the BEAF/CausalMM comparison path.
-
-For benchmark licensing hygiene, `data/beaf/` is shipped as a placeholder only.
-Download the official BEAF Q/A JSON and image release yourself, then place them
-under `data/beaf/beaf_qna.json` and `data/beaf/images/`.
-
-## RoPE
-
-See `docs/ROPE.md`. In short, this bundle relies on Hugging Face Gemma 3 RoPE and keeps patched forward logic aligned through `cache_position`; there is no separate custom RoPE implementation to enable.
+不要提交模型权重、图片、NPZ 大文件、checkpoint、日志、本地虚拟环境或生成
+输出。

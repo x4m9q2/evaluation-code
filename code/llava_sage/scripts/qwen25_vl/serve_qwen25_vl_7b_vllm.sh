@@ -2,8 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV_DIR="${VENV_DIR:-/root/venv/llava_old}"
-MODEL_DIR="${MODEL_DIR:-/root/models/Qwen2.5-VL-7B-Instruct}"
+VENV_DIR="${VENV_DIR:-.venv_llava_old}"
+MODEL_DIR="${MODEL_DIR:-models/Qwen2.5-VL-7B-Instruct}"
 HOST="${HOST:-0.0.0.0}"
 PORT="${PORT:-8001}"
 SERVED_MODEL_NAME="${SERVED_MODEL_NAME:-Qwen2.5-VL-7B-Instruct}"

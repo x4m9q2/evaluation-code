@@ -8,7 +8,7 @@ from PIL import Image
 
 
 DEFAULT_DATA_PATH = Path("/path/to/sage_repro_bundle/test_data/test_raw_with_shortcut_answer.json")
-DEFAULT_IMAGE_DIR = Path("/root/train2014")
+DEFAULT_IMAGE_DIR = Path("data/images/coco/train2014")
 DEFAULT_MASK_PATH = Path("/path/to/sage_repro_bundle/patch_mask_analysis_output_mask_coco_seg_direct_llava_pad336_patch14.npz")
 DEFAULT_OUTPUT_DIR = Path("/path/to/sage_repro_bundle/analysis/qwen_patch_suppressed_test_raw_r1p0")
 

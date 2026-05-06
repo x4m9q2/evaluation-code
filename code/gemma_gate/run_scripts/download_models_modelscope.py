@@ -5,7 +5,6 @@ The bundle scripts expect these local paths by default:
 
   models/Gemma-3-4B-IT
   models/siglip-so400m-patch14-384
-  code/gemma_gate/x_verify/xVerify-0.5B-I
 """
 
 from __future__ import annotations
@@ -29,11 +28,6 @@ DEFAULT_MODELS = {
     "siglip": {
         "model_id": "AI-ModelScope/siglip-so400m-patch14-384",
         "local_dir": str(BUNDLE_ROOT / "models/siglip-so400m-patch14-384"),
-    },
-    # xVerify judge model for accuracy and shortcut-rate measurement.
-    "xverify": {
-        "model_id": "IAAR-Shanghai/xVerify-0.5B-I",
-        "local_dir": str(BUNDLE_ROOT / "code/gemma_gate/x_verify/xVerify-0.5B-I"),
     },
 }
 

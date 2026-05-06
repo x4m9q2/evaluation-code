@@ -1,6 +1,6 @@
 {
   "created_at_utc": "2026-05-04T02:25:47.256383+00:00",
-  "package_name": "SAGE-AS upload-ready data package",
+  "package_name": "VQA-CMSV Benchmark upload-ready data package",
   "root": ".",
   "policy": {
     "json_splits": "Original train/val/test JSON or JSONL splits are copied unchanged except for path sanitization. Qwen-filtered questions are not removed from JSON.",
@@ -12,23 +12,42 @@
     {
       "dataset": "vqa",
       "split": "train",
-      "path": "data/vqa/train.json",
-      "records": 97582,
+      "path": "data/vqa_v2_cmsv/train.json",
+      "records": 219562,
       "answer_type_counts": {
-        "number": 7301,
-        "other": 21452,
-        "yes/no": 68829
+        "number": 16428,
+        "other": 48268,
+        "yes/no": 154866
       },
       "qwen_filter_applied_to_json": false,
-      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "image_path_policy": "raw images are not included; records reference upstream VQA train2014 image_id values",
       "absolute_or_local_path_fields_remaining": 0,
-      "bytes": 19062672,
-      "sha256": "0bcd812918a85f54355b8e2a6f3ddb8bc4bb63443e5f55d9fa177ebc63434684"
+      "bytes": 49155643,
+      "sha256": "eb4ce0c7f975158ff9c987f072959b1ef69f02294e68bb039e4d46cbeb851241",
+      "stage2_experiment_training_mix": true,
+      "data_source_counts": {
+        "train_raw_filtered_masked": 75196,
+        "train_raw_removed_nomask": 22386,
+        "vqa_train2014_nomask": 121980
+      },
+      "mask_supervision_counts": {
+        "none": 144366,
+        "sam3_patch_mask": 75196
+      },
+      "fields": [
+        "answer",
+        "answer_type",
+        "data_source",
+        "image_id",
+        "mask_supervision",
+        "question",
+        "question_id"
+      ]
     },
     {
       "dataset": "vqa",
       "split": "val",
-      "path": "data/vqa/val.json",
+      "path": "data/vqa_v2_cmsv/val.json",
       "records": 12199,
       "answer_type_counts": {
         "number": 913,
@@ -44,7 +63,7 @@
     {
       "dataset": "vqa",
       "split": "test",
-      "path": "data/vqa/test.json",
+      "path": "data/vqa_v2_cmsv/test.json",
       "records": 12199,
       "answer_type_counts": {
         "number": 913,
@@ -60,7 +79,7 @@
     {
       "dataset": "gqa",
       "split": "train",
-      "path": "data/gqa/train.jsonl",
+      "path": "data/gqa_cmsv/train.jsonl",
       "records": 8007,
       "answer_type_counts": {
         "other": 4340,
@@ -75,7 +94,7 @@
     {
       "dataset": "gqa",
       "split": "val",
-      "path": "data/gqa/val.jsonl",
+      "path": "data/gqa_cmsv/val.jsonl",
       "records": 1010,
       "answer_type_counts": {
         "other": 540,
@@ -90,7 +109,7 @@
     {
       "dataset": "gqa",
       "split": "test",
-      "path": "data/gqa/test.jsonl",
+      "path": "data/gqa_cmsv/test.jsonl",
       "records": 983,
       "answer_type_counts": {
         "other": 530,
@@ -105,7 +124,7 @@
     {
       "dataset": "vg",
       "split": "train",
-      "path": "data/vg/train.jsonl",
+      "path": "data/vg_cmsv/train.jsonl",
       "records": 8002,
       "answer_type_counts": {
         "number": 2667,
@@ -120,7 +139,7 @@
     {
       "dataset": "vg",
       "split": "val",
-      "path": "data/vg/val.jsonl",
+      "path": "data/vg_cmsv/val.jsonl",
       "records": 996,
       "answer_type_counts": {
         "number": 329,
@@ -135,7 +154,7 @@
     {
       "dataset": "vg",
       "split": "test",
-      "path": "data/vg/test.jsonl",
+      "path": "data/vg_cmsv/test.jsonl",
       "records": 1002,
       "answer_type_counts": {
         "number": 337,
@@ -151,7 +170,7 @@
   "masks": [
     {
       "dataset": "vqa",
-      "path": "masks/vqa_masks.npz",
+      "path": "masks/vqa_v2_cmsv_masks.npz",
       "npz_rows": 69884,
       "coverage_shape": [
         69884,
@@ -167,7 +186,7 @@
     },
     {
       "dataset": "gqa",
-      "path": "masks/gqa_masks.npz",
+      "path": "masks/gqa_cmsv_masks.npz",
       "npz_rows": 5461,
       "coverage_shape": [
         5461,
@@ -183,7 +202,7 @@
     },
     {
       "dataset": "vg",
-      "path": "masks/vg_masks.npz",
+      "path": "masks/vg_cmsv_masks.npz",
       "npz_rows": 3772,
       "coverage_shape": [
         3772,

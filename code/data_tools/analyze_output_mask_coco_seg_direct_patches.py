@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw
 
 DEFAULT_MAPPING_JSON = Path("/path/to/sage_repro_bundle/merged_output_rule_mapping.json")
 DEFAULT_COCO_INSTANCES = Path("/path/to/sage_repro_bundle/object_annotation_bundle/coco/instances_train2017.json")
-DEFAULT_IMAGE_DIR = Path("/root/train2014")
+DEFAULT_IMAGE_DIR = Path("data/images/coco/train2014")
 DEFAULT_MODEL_CONFIG = Path("/path/to/sage_repro_bundle/llava-v1.5-7b/config.json")
 DEFAULT_VISION_CONFIG = Path("/path/to/sage_repro_bundle/clip-vit-large-patch14-336/config.json")
 DEFAULT_PREPROCESSOR_CONFIG = Path("/path/to/sage_repro_bundle/clip-vit-large-patch14-336/preprocessor_config.json")

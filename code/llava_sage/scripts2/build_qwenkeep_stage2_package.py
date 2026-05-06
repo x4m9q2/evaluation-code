@@ -54,17 +54,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-json",
         type=Path,
-        default=DEFAULT_BUNDLE_ROOT / "data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa.json",
+        default=DEFAULT_BUNDLE_ROOT / "data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa_nonumbermask.json",
     )
     parser.add_argument(
         "--output-mask-npz",
         type=Path,
-        default=DEFAULT_BUNDLE_ROOT / "data/stage2/patch_mask_analysis_train_raw_qwenkeep_sam3_compat.npz",
+        default=DEFAULT_BUNDLE_ROOT / "data/stage2/patch_mask_analysis_train_raw_qwenkeep_sam3_nonumbermask_compat.npz",
     )
     parser.add_argument(
         "--summary-json",
         type=Path,
-        default=DEFAULT_BUNDLE_ROOT / "data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa.summary.json",
+        default=DEFAULT_BUNDLE_ROOT / "data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa_nonumbermask.summary.json",
     )
     parser.add_argument(
         "--model-config",
@@ -273,14 +273,20 @@ def main() -> None:
     mixed_rows: list[dict[str, Any]] = []
     mask_rows: list[dict[str, Any]] = []
     missing_mask_qids: list[int] = []
+    number_mask_removed_qids: list[int] = []
 
     for qid in keep_qids:
         row = dict(train_by_qid[qid])
         mask_path = args.mask_dir / f"{qid}.png"
         if mask_path.exists():
-            row["data_source"] = "train_raw_filtered_masked"
-            row["mask_supervision"] = "sam3_patch_mask"
-            mask_rows.append(row)
+            if str(row.get("answer_type", "")) == "number":
+                row["data_source"] = "train_raw_filtered_number_nomask"
+                row["mask_supervision"] = "none"
+                number_mask_removed_qids.append(qid)
+            else:
+                row["data_source"] = "train_raw_filtered_masked"
+                row["mask_supervision"] = "sam3_patch_mask"
+                mask_rows.append(row)
         else:
             row["data_source"] = "train_raw_filtered_missingmask_nomask"
             row["mask_supervision"] = "none"
@@ -314,10 +320,11 @@ def main() -> None:
         preprocessor_config_path=args.preprocessor_config,
         output_path=args.output_mask_npz,
         metadata_extra={
-            "compat_source": "qwen_keep_only",
+            "compat_source": "qwen_keep_nonumbermask",
             "compat_source_json": str(args.output_json),
             "compat_keep_json": str(args.keep_json),
             "compat_remove_json": str(args.remove_json),
+            "nonumbermask_rule": "keep all JSON rows, but set answer_type == 'number' mask_supervision to none and drop those mask rows from NPZ",
         },
     )
 
@@ -329,12 +336,14 @@ def main() -> None:
         "train_raw_remove_total": len(remove_qids),
         "train_raw_masked_total": len(mask_rows),
         "train_raw_missingmask_nomask_total": len(missing_mask_qids),
+        "train_raw_number_mask_removed_total": len(number_mask_removed_qids),
         "vqa_total": len(vqa_rows),
         "mixed_total": len(mixed_rows),
         "shuffle_seed": args.shuffle_seed,
         "sources": dict(Counter(x["data_source"] for x in mixed_rows)),
         "mask_supervision_counts": dict(Counter(x["mask_supervision"] for x in mixed_rows)),
         "missing_mask_qids_head": missing_mask_qids[:20],
+        "number_mask_removed_qids_head": number_mask_removed_qids[:20],
     }
     args.summary_json.parent.mkdir(parents=True, exist_ok=True)
     with args.summary_json.open("w", encoding="utf-8") as f:

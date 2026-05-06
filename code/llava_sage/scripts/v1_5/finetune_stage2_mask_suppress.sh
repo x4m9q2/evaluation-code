@@ -20,7 +20,7 @@ export CUDA_VISIBLE_DEVICES
 MODEL_NAME_OR_PATH="${MODEL_NAME_OR_PATH:-${REPO_ROOT}/llava-v1.5-7b}"
 PRETRAIN_MM_MLP_ADAPTER="${PRETRAIN_MM_MLP_ADAPTER:-${REPO_ROOT}/checkpoints/llava_pretrain_4gpu_xformers_aggressive_p2p_bs32_gate_pretain_meanreg_20260319_052641/mm_projector.bin}"
 DATA_PATH="${DATA_PATH:-${REPO_ROOT}/train_raw.json}"
-IMAGE_FOLDER="${IMAGE_FOLDER:-/root/train2014}"
+IMAGE_FOLDER="${IMAGE_FOLDER:-data/images/coco/train2014}"
 VISION_TOWER="${VISION_TOWER:-${REPO_ROOT}/clip-vit-large-patch14-336}"
 PATCH_MASK_ANALYSIS_PATH="${PATCH_MASK_ANALYSIS_PATH:-${REPO_ROOT}/patch_mask_analysis_llava_pad336_patch14.npz}"
 DEEPSPEED_CONFIG="${DEEPSPEED_CONFIG:-${REPO_ROOT}/scripts/zero2_bf16.json}"

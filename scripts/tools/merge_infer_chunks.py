@@ -10,6 +10,7 @@ def parse_args():
     parser.add_argument("--chunk-dir", required=True, type=Path)
     parser.add_argument("--num-chunks", required=True, type=int)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--limit", type=int, default=None)
     return parser.parse_args()
 
 
@@ -24,6 +25,8 @@ def load_json_array(path: Path):
 def main():
     args = parse_args()
     source_rows = load_json_array(args.source_data)
+    if args.limit is not None:
+        source_rows = source_rows[:args.limit]
     source_stem = args.source_data.stem
 
     by_qid = {}
@@ -58,4 +61,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

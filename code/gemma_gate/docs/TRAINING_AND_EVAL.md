@@ -12,10 +12,10 @@ models/siglip-so400m-patch14-384
 code/gemma_gate/x_verify/xVerify-0.5B-I
 data/pretrain_llava_v1_5_mix665k_single_noocr_max200_imageonly_strict_noocr.json
 data/playground_data
-data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa.json
-data/stage2/patch_mask_analysis_train_raw_qwenkeep_sam3_compat.npz
+data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa_nonumbermask.json
+data/stage2/patch_mask_analysis_train_raw_qwenkeep_sam3_nonumbermask_compat.npz
 data/eval/test_raw_with_shortcut_answer.json
-data/playground_data/coco/train2014
+data/images/coco/train2014
 ```
 
 Model weights can be downloaded from ModelScope with:
@@ -129,25 +129,25 @@ bash run_scripts/run_gemma_finetune_gate_l1_mask_nonumber.sh
 - `shortcut_answer`
 - `answer_type`
 
-Run inference and xVerify:
+Run inference first:
 
 ```bash
-MODEL_PATH=checkpoints/your_model \
-bash run_scripts/run_gemma_eval_test_raw_xverify.sh
+bash scripts/run_eval_test_raw.sh
 ```
 
-The metrics file is:
+This repository no longer ships the runnable `xVerify` evaluation code or its
+weights. To reproduce the original `ACC` / `SR` protocol externally, build two
+judge inputs from the merged prediction file:
 
-```bash
-infer_result/<model_name>/test_raw_with_shortcut_answer.xverify_metrics.json
-```
+- `ACC`: compare `model_pred` against `answer`
+- `SR`: compare `model_pred` against `shortcut_answer`
 
-It contains:
+Both comparisons should keep `question` and `answer_type`. Aggregate each
+metric as judged-correct over valid rows, and optionally report the
+`by_answer_type` breakdown.
 
-- overall accuracy
-- overall shortcut rate
-- `by_answer_type` breakdown for accuracy
-- `by_answer_type` breakdown for shortcut rate
+The original local experiments used `xVerify-0.5B-I` as the judge model for
+both metrics. Use the same judge if you need comparable numbers.
 
 This main evaluation path does not depend on the original LLaVA package.
 `scripts2/eval_vqav2_testdev.py` is a reference-only helper and still expects
@@ -155,12 +155,58 @@ This main evaluation path does not depend on the original LLaVA package.
 
 ## 6. Accuracy Only On A Training Set
 
-For a training-set file without `shortcut_answer`, run Gemma inference first and then xVerify only against `answer`. The packaged `eval_shortcut_metrics.py` expects both `answer` and `shortcut_answer`, so for accuracy-only use either:
+For a training-set file without `shortcut_answer`, run inference first and
+evaluate only normal correctness against `answer`.
 
-- add a temporary `shortcut_answer` equal to an empty string and ignore SR, or
-- adapt `scripts2/eval_shortcut_metrics.py` to call only the accuracy branch.
+## 7. NaPO Notes
 
-## 7. Current Example Runs
+This repo currently keeps two separate NaPO paths:
+
+- Gemma NaPO: top-level wrapper `scripts/run_napo_shortcut.sh`, reading
+  `data/napo/train_raw_pos_neg_shortcut.json`
+- LLaVA NaPO: top-level wrapper `scripts/run_napo_llava.sh`, reading
+  `data/napo_llava/train_raw_pos_neg_shortcut_hf`
+
+The LLaVA NaPO code under `third_party/napo_llava_ref/` is a local source copy
+of `third_party/napo_llava_ref`, with a few small compatibility fixes documented
+in `third_party/napo_llava_ref/README.md`.
+
+The actual imported-source diff is limited to:
+
+- `third_party/napo_llava_ref/utils/utils.py`: lazy `matplotlib` import
+- `third_party/napo_llava_ref/muffin/train/trainers.py`:
+  `compute_loss(..., num_items_in_batch=None)` for `transformers==4.51.3`,
+  plus removal of the debug `print(data_dict.keys())`
+- `third_party/napo_llava_ref/README.md`: local provenance / compatibility
+  note for the imported tree
+
+Bundle-side launch compatibility is handled in `scripts/run_napo_llava.sh`:
+
+- repository-relative path resolution and `PYTHONPATH` setup
+- local CLIP symlink bootstrap under `third_party/clip-vit-large-patch14-336`
+- `--eval_strategy no` instead of upstream `--evaluation_strategy no`
+
+Historical scripts inside `third_party/napo_llava_ref/script/train/` are kept
+for traceability and may still use upstream absolute paths or
+`--evaluation_strategy no`. Prefer `scripts/run_napo_llava.sh`.
+
+Shortcut stage-2 outputs can be converted into the LLaVA NaPO HF dataset with:
+
+```bash
+RUN=1 PYTHON_BIN=$PWD/.venv_gemma/bin/python \
+  bash scripts/run_build_shortcut_napo_splits.sh
+
+RUN=1 PYTHON_BIN=$PWD/.venv_gemma/bin/python \
+  bash scripts/run_build_shortcut_napo_llava_dataset.sh
+```
+
+Validated LLaVA NaPO smoke:
+
+- `max_steps=1`
+- `global_step=1`
+- checkpoint written under `/tmp/napo_llava_shortcut_generated_smoke/checkpoints/checkpoint-1`
+
+## 8. Current Example Runs
 
 Example logs in `log_examples/`:
 
@@ -170,7 +216,7 @@ Example logs in `log_examples/`:
 
 These are useful for checking exact command lines and expected loss fields.
 
-## 8. Loss Fields
+## 9. Loss Fields
 
 Training logs include:
 

@@ -103,7 +103,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path("/path/to/sage_repro_bundle/test_data/test_raw_with_shortcut_answer.json"),
     )
-    parser.add_argument("--image-folder", type=Path, default=Path("/root/train2014"))
+    parser.add_argument("--image-folder", type=Path, default=Path("data/images/coco/train2014"))
     parser.add_argument(
         "--output-dir",
         type=Path,

@@ -23,7 +23,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--image-dir",
-        default="/root/train2014",
+        default="data/images/coco/train2014",
         help="Directory containing original COCO train2014 images.",
     )
     parser.add_argument(

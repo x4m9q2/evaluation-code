@@ -5,7 +5,6 @@ import argparse
 import base64
 import json
 import os
-import subprocess
 import sys
 import threading
 import time
@@ -21,10 +20,8 @@ from PIL import Image
 
 REPO_ROOT = Path("/path/to/sage_repro_bundle")
 DEFAULT_DATA_PATH = REPO_ROOT / "test_data" / "test_raw_with_shortcut_answer.json"
-DEFAULT_IMAGE_FOLDER = Path("/root/train2014")
+DEFAULT_IMAGE_FOLDER = Path("data/images/coco/train2014")
 DEFAULT_OUTPUT_ROOT = REPO_ROOT / "infer_result"
-DEFAULT_XVERIFY_ROOT = REPO_ROOT / "x_verify"
-DEFAULT_XVERIFY_MODEL = DEFAULT_XVERIFY_ROOT / "xVerify-0.5B-I"
 DEFAULT_BASE_URL = "https://yunwu.ai/v1"
 DEFAULT_COCO_URL_PREFIX = "https://images.cocodataset.org/train2014"
 
@@ -93,11 +90,6 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--overwrite", action="store_true")
-    parser.add_argument("--run-xverify", action="store_true")
-    parser.add_argument("--xverify-root", type=Path, default=DEFAULT_XVERIFY_ROOT)
-    parser.add_argument("--xverify-model-path", type=Path, default=DEFAULT_XVERIFY_MODEL)
-    parser.add_argument("--xverify-gpu", default="0")
-    parser.add_argument("--xverify-batch-size", type=int, default=32)
     return parser.parse_args()
 
 
@@ -459,28 +451,6 @@ def save_generation_stats(merged_rows: List[dict], out_path: Path, started_at: f
     save_json(stats, out_path)
 
 
-def run_combined_xverify(merged_file: Path, args: argparse.Namespace) -> None:
-    cmd = [
-        sys.executable,
-        str(REPO_ROOT / "scripts2" / "eval_shortcut_metrics.py"),
-        "--input-path",
-        str(merged_file),
-        "--xverify-root",
-        str(args.xverify_root),
-        "--xverify-model-path",
-        str(args.xverify_model_path),
-        "--gpu",
-        args.xverify_gpu,
-        "--batch-size",
-        str(args.xverify_batch_size),
-    ]
-    if args.overwrite:
-        cmd.append("--overwrite")
-    env = os.environ.copy()
-    env["PYTHONPATH"] = f"{REPO_ROOT}{os.pathsep}{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(REPO_ROOT)
-    subprocess.run(cmd, cwd=REPO_ROOT, env=env, check=True)
-
-
 def main() -> None:
     args = parse_args()
     if not args.api_key:
@@ -506,8 +476,6 @@ def main() -> None:
 
     if merged_file.exists() and not args.overwrite:
         print(f"[skip] merged file already exists: {merged_file}")
-        if args.run_xverify:
-            run_combined_xverify(merged_file, args)
         return
 
     started_at = time.time()
@@ -523,9 +491,6 @@ def main() -> None:
     if tmp_file.exists():
         tmp_file.unlink()
     print(merged_file)
-
-    if args.run_xverify:
-        run_combined_xverify(merged_file, args)
 
 
 if __name__ == "__main__":

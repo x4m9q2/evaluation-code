@@ -19,32 +19,31 @@ export OMP_NUM_THREADS="${OMP_NUM_THREADS:-8}"
 
 export LLAVA_BASE_MODEL="${LLAVA_BASE_MODEL:-${BUNDLE_ROOT}/models/llava-v1.5-7b}"
 export LLAVA_VISION_TOWER="${LLAVA_VISION_TOWER:-${BUNDLE_ROOT}/models/clip-vit-large-patch14-336}"
-export XVERIFY_MODEL="${XVERIFY_MODEL:-${BUNDLE_ROOT}/models/xVerify-0.5B-I}"
-export XVERIFY_ROOT="${XVERIFY_ROOT:-${BUNDLE_ROOT}/code/evaluation/x_verify}"
 export SAM3_CHECKPOINT="${SAM3_CHECKPOINT:-${BUNDLE_ROOT}/models/sam3_ckpt/sam3.pt}"
 
 export LLAVA_PRETRAIN_DATA="${LLAVA_PRETRAIN_DATA:-${BUNDLE_ROOT}/data/pretrain_llava_v1_5_mix665k_single_noocr_max200_imageonly_strict_noocr.json}"
-export LLAVA_PRETRAIN_IMAGE_ROOT="${LLAVA_PRETRAIN_IMAGE_ROOT:-${BUNDLE_ROOT}/data/images}"
+# Pretraining samples keep LLaVA's original relative image paths such as coco/train2017/....
+export LLAVA_PRETRAIN_IMAGE_ROOT="${LLAVA_PRETRAIN_IMAGE_ROOT:-${BUNDLE_ROOT}/data/playground_data}"
 export SAGE_AS_ROOT="${SAGE_AS_ROOT:-${BUNDLE_ROOT}/data/sage_as}"
 export SAGE_AS_DATASET="${SAGE_AS_DATASET:-vqa}"
 case "${SAGE_AS_DATASET}" in
-  vqa)
-    SAGE_AS_TRAIN_REL="data/vqa/train.json"
-    SAGE_AS_VAL_REL="data/vqa/val.json"
-    SAGE_AS_MASK_REL="masks/vqa_masks.npz"
+  vqa|vqa_v2_cmsv|vqa-v2-cmsv)
+    SAGE_AS_TRAIN_REL="data/vqa_v2_cmsv/train.json"
+    SAGE_AS_VAL_REL="data/vqa_v2_cmsv/val.json"
+    SAGE_AS_MASK_REL="masks/vqa_v2_cmsv_masks.npz"
     ;;
-  gqa)
-    SAGE_AS_TRAIN_REL="data/gqa/train.jsonl"
-    SAGE_AS_VAL_REL="data/gqa/val.jsonl"
-    SAGE_AS_MASK_REL="masks/gqa_masks.npz"
+  gqa|gqa_cmsv|gqa-cmsv)
+    SAGE_AS_TRAIN_REL="data/gqa_cmsv/train.jsonl"
+    SAGE_AS_VAL_REL="data/gqa_cmsv/val.jsonl"
+    SAGE_AS_MASK_REL="masks/gqa_cmsv_masks.npz"
     ;;
-  vg)
-    SAGE_AS_TRAIN_REL="data/vg/train.jsonl"
-    SAGE_AS_VAL_REL="data/vg/val.jsonl"
-    SAGE_AS_MASK_REL="masks/vg_masks.npz"
+  vg|vg_cmsv|vg-cmsv)
+    SAGE_AS_TRAIN_REL="data/vg_cmsv/train.jsonl"
+    SAGE_AS_VAL_REL="data/vg_cmsv/val.jsonl"
+    SAGE_AS_MASK_REL="masks/vg_cmsv_masks.npz"
     ;;
   *)
-    echo "[error] SAGE_AS_DATASET must be one of: vqa, gqa, vg. Got: ${SAGE_AS_DATASET}" >&2
+    echo "[error] SAGE_AS_DATASET must be one of: vqa, gqa, vg, vqa_v2_cmsv, gqa_cmsv, vg_cmsv. Got: ${SAGE_AS_DATASET}" >&2
     exit 2
     ;;
 esac
@@ -58,8 +57,27 @@ export LLAVA_PRETRAIN_OUTPUT="${LLAVA_PRETRAIN_OUTPUT:-${BUNDLE_ROOT}/checkpoint
 export VQA_TRAIN2014_IMAGE_ROOT="${VQA_TRAIN2014_IMAGE_ROOT:-${BUNDLE_ROOT}/data/images/coco/train2014}"
 export VQA_VAL2014_IMAGE_ROOT="${VQA_VAL2014_IMAGE_ROOT:-${BUNDLE_ROOT}/data/images/coco/val2014}"
 
-export TEST_RAW_WITH_SHORTCUT="${TEST_RAW_WITH_SHORTCUT:-${BUNDLE_ROOT}/data/eval/test_raw_with_shortcut_answer.json}"
-export TEST_IMAGE_ROOT="${TEST_IMAGE_ROOT:-${BUNDLE_ROOT}/data/images/coco/train2014}"
+export LLAVA_EVAL_DATASET="${LLAVA_EVAL_DATASET:-${SAGE_AS_DATASET}}"
+case "${LLAVA_EVAL_DATASET}" in
+  vqa|vqa_v2_cmsv|vqa-v2-cmsv)
+    LLAVA_EVAL_DATA_REL="data/vqa_v2_cmsv/test.json"
+    LLAVA_EVAL_IMAGE_ROOT_DEFAULT="${BUNDLE_ROOT}/data/images/coco/train2014"
+    ;;
+  gqa|gqa_cmsv|gqa-cmsv)
+    LLAVA_EVAL_DATA_REL="data/gqa_cmsv/test.jsonl"
+    LLAVA_EVAL_IMAGE_ROOT_DEFAULT="${BUNDLE_ROOT}/data/images/gqa/images"
+    ;;
+  vg|vg_cmsv|vg-cmsv)
+    LLAVA_EVAL_DATA_REL="data/vg_cmsv/test.jsonl"
+    LLAVA_EVAL_IMAGE_ROOT_DEFAULT="${BUNDLE_ROOT}/data/images/vg"
+    ;;
+  *)
+    echo "[error] LLAVA_EVAL_DATASET must be one of: vqa, gqa, vg, vqa_v2_cmsv, gqa_cmsv, vg_cmsv. Got: ${LLAVA_EVAL_DATASET}" >&2
+    exit 2
+    ;;
+esac
+export TEST_RAW_WITH_SHORTCUT="${TEST_RAW_WITH_SHORTCUT:-${SAGE_AS_ROOT}/${LLAVA_EVAL_DATA_REL}}"
+export TEST_IMAGE_ROOT="${TEST_IMAGE_ROOT:-${LLAVA_EVAL_IMAGE_ROOT_DEFAULT}}"
 
 export POPE_QUESTION_FILE="${POPE_QUESTION_FILE:-${BUNDLE_ROOT}/data/pope/llava_pope_test.jsonl}"
 export POPE_ANNOTATION_DIR="${POPE_ANNOTATION_DIR:-${BUNDLE_ROOT}/data/pope/coco}"

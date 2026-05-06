@@ -14,7 +14,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--train-json", default="/path/to/sage_repro_bundle/train_raw.json")
     parser.add_argument("--mask-dir", default="/path/to/sage_repro_bundle/output_mask_coco_seg")
-    parser.add_argument("--image-dir", default="/root/train2014")
+    parser.add_argument("--image-dir", default="data/images/coco/train2014")
     parser.add_argument("--coco-instances", default="/path/to/sage_repro_bundle/object_annotation_bundle/coco/instances_train2017.json")
     parser.add_argument(
         "--drop-labels",

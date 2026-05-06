@@ -1,5 +1,5 @@
 ---
-pretty_name: SAGE-AS
+pretty_name: VQA-CMSV Benchmark
 license: other
 language:
 - en
@@ -14,75 +14,77 @@ tags:
 size_categories:
 - 100K<n<1M
 configs:
-- config_name: vqa
+- config_name: vqa_v2_cmsv
   data_files:
   - split: train
-    path: data/vqa/train.json
+    path: data/vqa_v2_cmsv/train.json
   - split: validation
-    path: data/vqa/val.json
+    path: data/vqa_v2_cmsv/val.json
   - split: test
-    path: data/vqa/test.json
-- config_name: gqa
+    path: data/vqa_v2_cmsv/test.json
+- config_name: gqa_cmsv
   data_files:
   - split: train
-    path: data/gqa/train.jsonl
+    path: data/gqa_cmsv/train.jsonl
   - split: validation
-    path: data/gqa/val.jsonl
+    path: data/gqa_cmsv/val.jsonl
   - split: test
-    path: data/gqa/test.jsonl
-- config_name: vg
+    path: data/gqa_cmsv/test.jsonl
+- config_name: vg_cmsv
   data_files:
   - split: train
-    path: data/vg/train.jsonl
+    path: data/vg_cmsv/train.jsonl
   - split: validation
-    path: data/vg/val.jsonl
+    path: data/vg_cmsv/val.jsonl
   - split: test
-    path: data/vg/test.jsonl
+    path: data/vg_cmsv/test.jsonl
 ---
 
-# SAGE-AS Data Package
+# VQA-CMSV Benchmark Data Package
 
-This repository contains annotation splits for VQA-AS, GQA-AS, and Visual Genome-AS, plus patch-mask NPZ files used for mask supervision experiments.
+This repository contains annotation splits for VQA v2-CMSV, GQA-CMSV, and VG-CMSV, plus patch-mask NPZ files used for mask supervision experiments.
 
 ## Contents
 
-- `data/vqa/train.json`, `data/vqa/val.json`, `data/vqa/test.json`
-- `data/gqa/train.jsonl`, `data/gqa/val.jsonl`, `data/gqa/test.jsonl`
-- `data/vg/train.jsonl`, `data/vg/val.jsonl`, `data/vg/test.jsonl`
-- `masks/vqa_masks.npz`
-- `masks/gqa_masks.npz`
-- `masks/vg_masks.npz`
+- `data/vqa_v2_cmsv/train.json`, `data/vqa_v2_cmsv/val.json`, `data/vqa_v2_cmsv/test.json`
+- `data/gqa_cmsv/train.jsonl`, `data/gqa_cmsv/val.jsonl`, `data/gqa_cmsv/test.jsonl`
+- `data/vg_cmsv/train.jsonl`, `data/vg_cmsv/val.jsonl`, `data/vg_cmsv/test.jsonl`
+- `masks/vqa_v2_cmsv_masks.npz`
+- `masks/gqa_cmsv_masks.npz`
+- `masks/vg_cmsv_masks.npz`
 - `manifest.json` and `metadata/summary.json`
 
 ## Important Notes
 
 Raw or masked image files are not included in this repository. Users must obtain or prepare the corresponding images separately and comply with the licenses of the original datasets.
 
+`data/vqa_v2_cmsv/train.json` is the stage-2 experiment training mix used in the main SAGE runs. It contains `219,562` records: `75,196` masked generated-CMSV records with SAM3 patch-mask supervision, `22,386` retained generated-CMSV records without mask supervision, and `121,980` VQA train2014 no-mask records.
+
 The JSON/JSONL split files keep all questions from the prepared splits. Questions filtered by Qwen during training are not removed from the JSON/JSONL files.
 
 The mask NPZ files are filtered directly. NPZ rows were removed if the `question_id` was filtered out by Qwen during training or if the sample has `answer_type == "number"`. This filtering applies only to released NPZ mask rows used for mask-supervision metadata; the corresponding QA records remain in the JSON/JSONL train, validation, and test splits.
 
-For GQA-AS and Visual Genome-AS, `image_path` has been sanitized to a relative placeholder under `masked_images/<dataset>/...`; these image files are not included.
+For GQA-CMSV and VG-CMSV, `image_path` has been sanitized to a relative placeholder under `masked_images/<dataset>/...`; these image files are not included.
 
 ## Split Sizes
 
 | Dataset | Train | Validation | Test |
 |---|---:|---:|---:|
-| VQA-AS | 97,582 | 12,199 | 12,199 |
-| GQA-AS | 8,007 | 1,010 | 983 |
-| Visual Genome-AS | 8,002 | 996 | 1,002 |
+| VQA v2-CMSV | 219,562 | 12,199 | 12,199 |
+| GQA-CMSV | 8,007 | 1,010 | 983 |
+| VG-CMSV | 8,002 | 996 | 1,002 |
 
 ## Mask NPZ Sizes
 
 | Dataset | NPZ rows | Shape |
 |---|---:|---|
-| VQA-AS | 69,884 | `(69884, 24, 24)` |
-| GQA-AS | 5,461 | `(5461, 24, 24)` |
-| Visual Genome-AS | 3,772 | `(3772, 24, 24)` |
+| VQA v2-CMSV | 69,884 | `(69884, 24, 24)` |
+| GQA-CMSV | 5,461 | `(5461, 24, 24)` |
+| VG-CMSV | 3,772 | `(3772, 24, 24)` |
 
 ## Fields
 
-Common fields include `question_id`, `image_id`, `answer_type`, and question/answer text. GQA-AS and Visual Genome-AS also include `text_keywords`, `visual_cues`, `original_answer`, `generated_question`, and `generated_answer`.
+Common fields include `question_id`, `image_id`, `answer_type`, and question/answer text. GQA-CMSV and VG-CMSV also include `text_keywords`, `visual_cues`, `original_answer`, `generated_question`, and `generated_answer`.
 
 The NPZ files contain `question_ids`, `image_ids`, `coverage_ratio`, `has_mask`, and related image padding metadata. `coverage_ratio[i, row, col]` is the fraction of a LLaVA 24x24 visual patch covered by the binary mask after pad-to-square preprocessing.
 

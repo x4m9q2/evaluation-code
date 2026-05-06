@@ -2,7 +2,7 @@
 set -euo pipefail
 
 UV_BIN="${UV_BIN:-$(command -v uv)}"
-VENV_DIR="${VENV_DIR:-/root/venv/qwen35_vllm}"
+VENV_DIR="${VENV_DIR:-.venv_qwen35_vllm}"
 PYTHON_VERSION="${PYTHON_VERSION:-3.10}"
 
 if [[ -z "${UV_BIN}" ]]; then

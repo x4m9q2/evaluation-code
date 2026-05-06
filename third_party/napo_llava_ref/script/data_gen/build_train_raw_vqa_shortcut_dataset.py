@@ -26,23 +26,23 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--train-raw-llava",
-        default="/path/to/sage_repro_bundle/train_raw_llava.jsonl",
+        default="data/stage2/train_raw_llava.jsonl",
     )
     parser.add_argument(
         "--train-raw-answers",
-        default="/path/to/sage_repro_bundle/train_raw.json",
+        default="data/stage2/train_raw.json",
     )
     parser.add_argument(
         "--shortcut-answers",
-        default="/path/to/sage_repro_bundle/vqa_train2014.json",
+        default="data/stage2/vqa_train2014.json",
     )
     parser.add_argument(
         "--image-root",
-        default="/root/train2014",
+        default="data/images/coco/train2014",
     )
     parser.add_argument(
         "--output-dir",
-        default="/path/to/sage_repro_bundle/NaPO-master/datasets/train_raw_vqa_shortcut_hf",
+        default="third_party/napo_llava_ref/datasets/train_raw_vqa_shortcut_hf",
     )
     parser.add_argument(
         "--stats-path",

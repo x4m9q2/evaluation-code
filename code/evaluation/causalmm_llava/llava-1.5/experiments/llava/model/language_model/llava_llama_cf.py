@@ -62,6 +62,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         input_ids: torch.LongTensor = None,
         attention_mask: Optional[torch.Tensor] = None,
         past_key_values: Optional[List[torch.FloatTensor]] = None,
+        cf_past_key_values: Optional[List[torch.FloatTensor]] = None,
         inputs_embeds: Optional[torch.FloatTensor] = None,
         cf_inputs_embeds: Optional[torch.FloatTensor] = None,
         labels: Optional[torch.LongTensor] = None,
@@ -100,7 +101,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         cf_outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            past_key_values=past_key_values,
+            past_key_values=cf_past_key_values,
             inputs_embeds=cf_inputs_embeds,
             use_cache=use_cache,
             output_attentions=output_attentions,

@@ -3,13 +3,14 @@ set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
-MODEL_PATH="${STAGE2_CHECKPOINT}"
+MODEL_PATH="${MODEL_PATH:-${STAGE2_CHECKPOINT}}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-${BUNDLE_ROOT}/outputs/infer_test_raw}"
 NUM_GPUS="${NUM_GPUS:-4}"
 BATCH_SIZE="${BATCH_SIZE:-16}"
 MAX_NEW_TOKENS="${MAX_NEW_TOKENS:-64}"
 OVERWRITE="${OVERWRITE:-0}"
 NO_SHORT_ANSWER_PROMPT="${NO_SHORT_ANSWER_PROMPT:-1}"
+LIMIT="${LIMIT:-}"
 
 MODEL_TAG="$(basename "${MODEL_PATH}")"
 OUT_DIR="${OUTPUT_ROOT}/${MODEL_TAG}"
@@ -37,6 +38,9 @@ for idx in $(seq 0 $((NUM_GPUS - 1))); do
   if [[ "${NO_SHORT_ANSWER_PROMPT}" == "1" ]]; then
     cmd+=(--no-short-answer-prompt)
   fi
+  if [[ -n "${LIMIT}" ]]; then
+    cmd+=(--limit "${LIMIT}")
+  fi
 
   echo "[launch] chunk ${idx}/${NUM_GPUS} on GPU ${idx}"
   "${cmd[@]}" > "${OUT_DIR}/chunk${idx}of${NUM_GPUS}.log" 2>&1 &
@@ -47,10 +51,18 @@ for pid in "${pids[@]}"; do
   wait "${pid}"
 done
 
-"${PYTHON_BIN}" "${BUNDLE_ROOT}/scripts/tools/merge_infer_chunks.py" \
-  --source-data "${TEST_RAW_WITH_SHORTCUT}" \
-  --chunk-dir "${OUT_DIR}" \
-  --num-chunks "${NUM_GPUS}" \
+merge_cmd=(
+  "${PYTHON_BIN}" "${BUNDLE_ROOT}/scripts/tools/merge_infer_chunks.py"
+  --source-data "${TEST_RAW_WITH_SHORTCUT}"
+  --chunk-dir "${OUT_DIR}"
+  --num-chunks "${NUM_GPUS}"
   --output "${OUT_DIR}/test_raw_with_shortcut_answer.merged.json"
+)
+
+if [[ -n "${LIMIT}" ]]; then
+  merge_cmd+=(--limit "${LIMIT}")
+fi
+
+"${merge_cmd[@]}"
 
 echo "${OUT_DIR}/test_raw_with_shortcut_answer.merged.json"

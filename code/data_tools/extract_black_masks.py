@@ -6,7 +6,7 @@ from PIL import Image
 
 
 DEFAULT_MASK_DIR = Path("/path/to/sage_repro_bundle/output_mask")
-DEFAULT_ORIGINAL_DIR = Path("/root/train2014")
+DEFAULT_ORIGINAL_DIR = Path("data/images/coco/train2014")
 DEFAULT_OUTPUT_DIR = Path("/path/to/sage_repro_bundle/pure_black_mask")
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 

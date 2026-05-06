@@ -78,7 +78,13 @@ def load_jsonl(path: str) -> List[dict]:
 
 def load_answers(path: str) -> Dict[int, dict]:
     with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+        text = f.read().strip()
+    if not text:
+        return {}
+    if text[0] == "[":
+        data = json.loads(text)
+    else:
+        data = [json.loads(line) for line in text.splitlines() if line.strip()]
     return {int(item["question_id"]): item for item in data}
 
 
@@ -113,14 +119,15 @@ def write_final_json(tmp_file: Path, output_file: Path) -> None:
             if not line.strip():
                 continue
             item = json.loads(line)
-            rows.append(
-                {
-                    "question": item["question"],
-                    "llm_output": item["llm_output"],
-                    "correct_answer": item["correct_answer"],
-                    "answer_type": item["answer_type"],
-                }
-            )
+            row = dict(item.get("source", {}))
+            row["question_id"] = int(item["question_id"])
+            row["question"] = item["question"]
+            row["model_pred"] = item["llm_output"]
+            row["llm_output"] = item["llm_output"]
+            row["answer"] = item["correct_answer"]
+            row["correct_answer"] = item["correct_answer"]
+            row["answer_type"] = item["answer_type"]
+            rows.append(row)
     with output_file.open("w", encoding="utf-8") as f:
         json.dump(rows, f, ensure_ascii=False, indent=2)
 
@@ -196,8 +203,9 @@ def main():
                             "question_id": question_id,
                             "question": answer_item["question"],
                             "llm_output": result.text,
-                            "correct_answer": answer_item["answer"],
-                            "answer_type": answer_item["answer_type"],
+                            "correct_answer": answer_item.get("answer", answer_item.get("correct_answer", "")),
+                            "answer_type": answer_item.get("answer_type", ""),
+                            "source": answer_item,
                         },
                         ensure_ascii=False,
                     )

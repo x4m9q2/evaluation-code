@@ -2,8 +2,8 @@ import argparse
 import math
 import os
 import json
+import uuid
 
-import shortuuid
 import numpy as np
 import torch
 from PIL import Image
@@ -303,7 +303,7 @@ def eval_model(args):
         outputs = [output.strip() for output in tokenizer.batch_decode(output_ids, skip_special_tokens=True)]
 
         for idx, cur_prompt, output in zip(batch["question_ids"], batch["prompts"], outputs):
-            ans_id = shortuuid.uuid()
+            ans_id = uuid.uuid4().hex
             ans_file.write(json.dumps({"question_id": idx,
                                        "prompt": cur_prompt,
                                        "text": output,
@@ -336,8 +336,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--torch-dtype",
         choices=["auto", "float16", "fp16", "bfloat16", "bf16", "float32", "fp32"],
-        default="auto",
-        help="Inference dtype. auto uses config.json torch_dtype when present, otherwise float16.",
+        default="bf16",
+        help="Inference dtype. Defaults to bf16.",
     )
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--num-workers", type=int, default=4)

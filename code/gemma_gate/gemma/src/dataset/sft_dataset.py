@@ -1,6 +1,6 @@
 import copy
 import os
-from typing import Dict
+from typing import Dict, Optional
 import re
 import pathlib
 import torch
@@ -41,12 +41,15 @@ class SupervisedDataset(Dataset):
     ):
         super(SupervisedDataset, self).__init__()
         if isinstance(data_path, str):
-            list_data_dict = json.load(open(data_path, "r"))
+            list_data_dict = load_supervised_data(data_path)
         else:
             list_data_dict = data_path
 
         self.processor = processor
-        self.list_data_dict = [normalize_multimodal_sample(sample) for sample in list_data_dict]
+        self.list_data_dict = [
+            normalize_multimodal_sample(sample, image_folder=data_args.image_folder)
+            for sample in list_data_dict
+        ]
         self.data_args = data_args
         self.padding = padding
         self.max_num_frames = data_args.max_num_frames
@@ -82,12 +85,10 @@ class SupervisedDataset(Dataset):
         if self.patch_mask_coverage is None:
             return None
         sample_answer_type = str(sample.get("answer_type", ""))
-        sample_mask_supervision = str(sample.get("mask_supervision", ""))
         question_id = int(sample.get("question_id", -1))
         row_idx = self.patch_mask_question_id_to_row.get(question_id, None)
         if (
             row_idx is None
-            or (sample_mask_supervision and sample_mask_supervision != "sam3_patch_mask")
             or (self.data_args.disable_number_mask_loss and sample_answer_type == "number")
         ):
             return np.zeros((self.patch_mask_coverage.shape[1],), dtype=np.float32)
@@ -294,22 +295,103 @@ def build_train2014_image_name(image_id: int) -> str:
     return f"COCO_train2014_{int(image_id):012d}.jpg"
 
 
-def normalize_multimodal_sample(sample: Dict) -> Dict:
+def load_supervised_data(data_path: str):
+    if str(data_path).endswith(".jsonl"):
+        rows = []
+        with open(data_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    rows.append(json.loads(line))
+        return rows
+    with open(data_path, "r") as f:
+        return json.load(f)
+
+
+def _as_int(value, default: int = -1) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _resolve_vqa_image(image_id: int, image_folder: Optional[str]) -> str:
+    filename = build_train2014_image_name(image_id)
+    candidates = [
+        filename,
+        os.path.join("coco", "train2014", filename),
+    ]
+    if image_folder:
+        for candidate in candidates:
+            if os.path.exists(os.path.join(image_folder, candidate)):
+                return candidate
+    return candidates[0]
+
+
+def _infer_sage_as_source(sample: Dict) -> str:
+    image_path = str(sample.get("image_path", ""))
+    if {"question", "answer", "image_id"}.issubset(sample.keys()):
+        return "vqa"
+    if "/gqa/" in image_path or image_path.startswith("gqa/"):
+        return "gqa"
+    if "/vg/" in image_path or image_path.startswith("vg/"):
+        return "vg"
+    return str(sample.get("data_source", "")).lower()
+
+
+def _resolve_vg_image(image_id: int, image_folder: Optional[str]) -> str:
+    candidates = [
+        os.path.join("vg", "VG_100K", f"{image_id}.jpg"),
+        os.path.join("vg", "VG_100K_2", f"{image_id}.jpg"),
+    ]
+    if image_folder:
+        for candidate in candidates:
+            if os.path.exists(os.path.join(image_folder, candidate)):
+                return candidate
+    return candidates[0]
+
+
+def normalize_multimodal_sample(sample: Dict, image_folder: Optional[str] = None) -> Dict:
     if "conversations" in sample:
         normalized = copy.deepcopy(sample)
         if "image" not in normalized and normalized.get("image_id") is not None:
-            normalized["image"] = build_train2014_image_name(normalized["image_id"])
+            normalized["image"] = _resolve_vqa_image(_as_int(normalized["image_id"]), image_folder)
         return normalized
 
     if {"question", "answer", "image_id"}.issubset(sample.keys()):
         question = str(sample["question"]).strip()
         answer = str(sample["answer"]).strip()
+        image_id = _as_int(sample["image_id"])
         return {
-            "question_id": int(sample.get("question_id", -1)),
-            "image_id": int(sample["image_id"]),
-            "image": build_train2014_image_name(sample["image_id"]),
+            "question_id": _as_int(sample.get("question_id", -1)),
+            "image_id": image_id,
+            "image": _resolve_vqa_image(image_id, image_folder),
             "answer_type": sample.get("answer_type", "other"),
-            "data_source": sample.get("data_source", ""),
+            "data_source": sample.get("data_source", "vqa"),
+            "mask_supervision": sample.get("mask_supervision", ""),
+            "conversations": [
+                {"from": "human", "value": f"{LLAVA_IMAGE_TOKEN}\n{question}"},
+                {"from": "gpt", "value": answer},
+            ],
+        }
+
+    if {"generated_question", "generated_answer", "image_id"}.issubset(sample.keys()):
+        question = str(sample["generated_question"]).strip()
+        answer = str(sample["generated_answer"]).strip()
+        image_id = _as_int(sample["image_id"])
+        source = _infer_sage_as_source(sample)
+        if source == "gqa":
+            image = os.path.join("gqa", "images", f"{image_id}.jpg")
+        elif source == "vg":
+            image = _resolve_vg_image(image_id, image_folder)
+        else:
+            image = str(sample.get("image_path", ""))
+        return {
+            "question_id": _as_int(sample.get("question_id", -1)),
+            "image_id": image_id,
+            "image": image,
+            "answer_type": sample.get("answer_type", "other"),
+            "data_source": sample.get("data_source", source),
             "mask_supervision": sample.get("mask_supervision", ""),
             "conversations": [
                 {"from": "human", "value": f"{LLAVA_IMAGE_TOKEN}\n{question}"},

@@ -5,7 +5,7 @@
   "credential_like_values_found": 0,
   "natural_language_false_positives": [
     {
-      "file": "data/gqa/train.jsonl",
+      "file": "data/gqa_cmsv/train.jsonl",
       "description": "A normal English question contains the phrase \"obelisk-shaped\"; this is not a credential."
     }
   ],

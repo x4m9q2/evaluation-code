@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV_DIR="${VENV_DIR:-/root/venv/unifolm}"
+VENV_DIR="${VENV_DIR:-.venv_unifolm}"
 
 if [[ ! -x "${VENV_DIR}/bin/python" ]]; then
   echo "Python was not found in ${VENV_DIR}." >&2

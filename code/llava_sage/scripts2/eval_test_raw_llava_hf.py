@@ -2,7 +2,6 @@
 import argparse
 import json
 import os
-import subprocess
 import sys
 import time
 from datetime import datetime
@@ -22,12 +21,10 @@ from llava.constants import DEFAULT_IMAGE_TOKEN
 from llava.conversation import conv_templates
 
 
-DEFAULT_MODEL_PATH = Path("/root/models/llava-1.5-13b-hf")
+DEFAULT_MODEL_PATH = Path("models/llava-1.5-13b-hf")
 DEFAULT_DATA_PATH = Path("/path/to/sage_repro_bundle/test_data/test_raw_with_shortcut_answer.json")
-DEFAULT_IMAGE_FOLDER = Path("/root/train2014")
+DEFAULT_IMAGE_FOLDER = Path("data/images/coco/train2014")
 DEFAULT_OUTPUT_ROOT = Path("/path/to/sage_repro_bundle/infer_result")
-DEFAULT_XVERIFY_ROOT = Path("/path/to/sage_repro_bundle/x_verify")
-DEFAULT_XVERIFY_MODEL = Path("/path/to/sage_repro_bundle/x_verify/xVerify-0.5B-I")
 
 
 def parse_args() -> argparse.Namespace:
@@ -46,15 +43,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--max-new-tokens", type=int, default=128)
     parser.add_argument("--conv-mode", default="llava_v1")
-    parser.add_argument(
-        "--run-xverify",
-        action="store_true",
-        help="推理完成后自动跑准确率和捷径率评测。",
-    )
-    parser.add_argument("--xverify-root", type=Path, default=DEFAULT_XVERIFY_ROOT)
-    parser.add_argument("--xverify-model-path", type=Path, default=DEFAULT_XVERIFY_MODEL)
-    parser.add_argument("--xverify-gpu", default="0", help="xVerify 使用的 CUDA_VISIBLE_DEVICES")
-    parser.add_argument("--xverify-batch-size", type=int, default=32)
     parser.add_argument(
         "--overwrite",
         action="store_true",
@@ -215,29 +203,6 @@ def save_json(data: object, path: Path) -> None:
     with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
         f.write("\n")
-
-
-def run_combined_xverify(merged_file: Path, args: argparse.Namespace) -> None:
-    cmd = [
-        sys.executable,
-        str(REPO_ROOT / "scripts2" / "eval_shortcut_metrics.py"),
-        "--input-path",
-        str(merged_file),
-        "--xverify-root",
-        str(args.xverify_root),
-        "--xverify-model-path",
-        str(args.xverify_model_path),
-        "--gpu",
-        args.xverify_gpu,
-        "--batch-size",
-        str(args.xverify_batch_size),
-    ]
-    if args.overwrite:
-        cmd.append("--overwrite")
-
-    env = os.environ.copy()
-    env["PYTHONPATH"] = f"{REPO_ROOT}{os.pathsep}{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(REPO_ROOT)
-    subprocess.run(cmd, cwd=str(REPO_ROOT), env=env, check=True)
 
 
 def run_worker(args: argparse.Namespace, rows: List[dict], model_tag: str) -> None:
@@ -511,9 +476,7 @@ def run_data_parallel(args: argparse.Namespace, rows: List[dict], model_tag: str
         if ret != 0:
             raise subprocess.CalledProcessError(ret, cmds[idx])
 
-    merged_file = merge_chunk_outputs(args, model_tag, rows, num_chunks)
-    if args.run_xverify:
-        run_combined_xverify(merged_file, args)
+    merge_chunk_outputs(args, model_tag, rows, num_chunks)
 
 
 def run_single_gpu(args: argparse.Namespace, rows: List[dict], model_tag: str) -> None:
@@ -528,9 +491,7 @@ def run_single_gpu(args: argparse.Namespace, rows: List[dict], model_tag: str) -
         return
 
     run_worker(args, rows, model_tag)
-    merged_file = merge_chunk_outputs(args, model_tag, rows, 1)
-    if args.run_xverify:
-        run_combined_xverify(merged_file, args)
+    merge_chunk_outputs(args, model_tag, rows, 1)
 
 
 def main() -> None:

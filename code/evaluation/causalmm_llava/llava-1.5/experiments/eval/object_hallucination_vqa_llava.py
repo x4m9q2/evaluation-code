@@ -23,6 +23,10 @@ from causalmm_cf.causalmm_sm import evolve_causalmm_sampling
 evolve_causalmm_sampling()
 
 
+def clean_question_text(text):
+    return text.replace(DEFAULT_IMAGE_TOKEN, "").strip()
+
+
 def eval_model(args):
     disable_torch_init()
     model_path = os.path.expanduser(args.model_path)
@@ -36,7 +40,7 @@ def eval_model(args):
     for line in tqdm(questions):
         idx = line["question_id"]
         image_file = line["image"]
-        qs = line["text"]
+        qs = clean_question_text(line["text"])
         cur_prompt = qs
         if model.config.mm_use_im_start_end:
             qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
