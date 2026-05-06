@@ -1,0 +1,58 @@
+# Python/cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments
+.venv/
+.venv_gemma/
+venv/
+env/
+
+# Local run artifacts
+checkpoints/*
+logs/*
+outputs/*
+analysis/*
+wandb/
+runs/
+
+# Large model/data artifacts
+models/**/*
+data/images/**/*
+data/playground_data/**/*
+data/pope/**/*
+data/beaf/**/*
+data/llava_stage1/**/*
+data/llava_stage2/**/*
+data/masks/**/*
+data2/**/*
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.arrow
+*.npz
+*.npy
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.mp4
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+
+# Keep placeholders and small metadata
+!checkpoints/.gitkeep
+!logs/.gitkeep
+!outputs/.gitkeep
+!models/README.md
+!data/README.md
+!data/sage_as/**
+

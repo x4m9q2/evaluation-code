@@ -1,0 +1,1746 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "arrayShape": "cr:arrayShape",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "containedIn": "cr:containedIn",
+    "cr": "http://mlcommons.org/croissant/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataBiases": "cr:dataBiases",
+    "dataCollection": "cr:dataCollection",
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "dct": "http://purl.org/dc/terms/",
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isArray": "cr:isArray",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "personalSensitiveInformation": "cr:personalSensitiveInformation",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "prov": "http://www.w3.org/ns/prov#"
+  },
+  "@type": "sc:Dataset",
+  "conformsTo": "http://mlcommons.org/croissant/1.1",
+  "name": "SAGE-AS",
+  "alternateName": [
+    "SAGE-AS",
+    "as-benchmark-artifacts/sage-as"
+  ],
+  "description": "SAGE-AS is a derived visual-question-answering shortcut-bias benchmark package containing VQA-AS, GQA-AS, and Visual Genome-AS train/validation/test annotations, plus filtered LLaVA 24x24 patch-mask NPZ metadata for mask-supervision experiments. Raw or masked images are not redistributed; users must obtain upstream images separately and comply with their licenses.",
+  "url": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as",
+  "citeAs": "SAGE-AS Data Package. Anonymous NeurIPS 2026 Evaluations and Datasets submission artifact.",
+  "datePublished": "2026-05-04",
+  "version": "1.0.0",
+  "isLiveDataset": false,
+  "inLanguage": [
+    "en"
+  ],
+  "license": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/LICENSE",
+  "creator": {
+    "@type": "Organization",
+    "name": "as-benchmark-artifacts",
+    "url": "https://huggingface.co/as-benchmark-artifacts"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "as-benchmark-artifacts",
+    "url": "https://huggingface.co/as-benchmark-artifacts"
+  },
+  "keywords": [
+    "visual-question-answering",
+    "vision-language",
+    "shortcut-bias",
+    "patch-mask",
+    "mask-supervision",
+    "llava",
+    "vqa",
+    "gqa",
+    "visual-genome",
+    "croissant",
+    "responsible-ai"
+  ],
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "vqa_train_json",
+      "name": "train.json",
+      "description": "VQA-AS train split annotations; 97582 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vqa/train.json",
+      "encodingFormat": "application/json",
+      "contentSize": "19062672",
+      "sha256": "0bcd812918a85f54355b8e2a6f3ddb8bc4bb63443e5f55d9fa177ebc63434684"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "vqa_val_json",
+      "name": "val.json",
+      "description": "VQA-AS val split annotations; 12199 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vqa/val.json",
+      "encodingFormat": "application/json",
+      "contentSize": "2384637",
+      "sha256": "702400c28c38135d18e140b30edd45cee590bc5272b04544c28b50f069c6ebcc"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "vqa_test_json",
+      "name": "test.json",
+      "description": "VQA-AS test split annotations; 12199 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vqa/test.json",
+      "encodingFormat": "application/json",
+      "contentSize": "2753670",
+      "sha256": "3d143faf31d04f03c0002466eb6941a1eb4e391f73f5e3ec6ddefd848ae93653"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "gqa_train_jsonl",
+      "name": "train.jsonl",
+      "description": "GQA-AS train split annotations; 8007 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/gqa/train.jsonl",
+      "encodingFormat": "application/jsonlines",
+      "contentSize": "2937802",
+      "sha256": "dbd2b8f3e0d4a07cd962d3bbbdb0b9aca4eeee6c4ab99db88817895834d717a4"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "gqa_val_jsonl",
+      "name": "val.jsonl",
+      "description": "GQA-AS val split annotations; 1010 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/gqa/val.jsonl",
+      "encodingFormat": "application/jsonlines",
+      "contentSize": "370643",
+      "sha256": "8d5135fc6637a5b059a41b77aac15201a28d5a88938a69d8f339feac16fb9546"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "gqa_test_jsonl",
+      "name": "test.jsonl",
+      "description": "GQA-AS test split annotations; 983 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/gqa/test.jsonl",
+      "encodingFormat": "application/jsonlines",
+      "contentSize": "360844",
+      "sha256": "fa998ef8b1ec479034b3a16f6d06610460394a1de08ebb0be87067d0da06bc86"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "vg_train_jsonl",
+      "name": "train.jsonl",
+      "description": "VG-AS train split annotations; 8002 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vg/train.jsonl",
+      "encodingFormat": "application/jsonlines",
+      "contentSize": "2954202",
+      "sha256": "039f094b6ddfd3a84dd974abf5d0f79b17fc2da1346c7be7f92a7d5528002543"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "vg_val_jsonl",
+      "name": "val.jsonl",
+      "description": "VG-AS val split annotations; 996 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vg/val.jsonl",
+      "encodingFormat": "application/jsonlines",
+      "contentSize": "368017",
+      "sha256": "e64e940e548f55895ae19de6bdedec6159413ae2e15cd2616da34a7aee21b653"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "vg_test_jsonl",
+      "name": "test.jsonl",
+      "description": "VG-AS test split annotations; 1002 records. Raw images are not included.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/data/vg/test.jsonl",
+      "encodingFormat": "application/jsonlines",
+      "contentSize": "369928",
+      "sha256": "a1e018d4b999f350b4bbded72006001225e4239c43a909c6127ddd43d3688fc7"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "vqa_mask_npz",
+      "name": "vqa_masks.npz",
+      "description": "VQA-AS filtered patch-mask NPZ metadata; 69884 rows and coverage shape (69884, 24, 24).",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/masks/vqa_masks.npz",
+      "encodingFormat": "application/octet-stream",
+      "contentSize": "13074117",
+      "sha256": "0b3dc0c629b96398557461f1353b9daaa0451ca2aed9af7fbd13308be73037af"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "gqa_mask_npz",
+      "name": "gqa_masks.npz",
+      "description": "GQA-AS filtered patch-mask NPZ metadata; 5461 rows and coverage shape (5461, 24, 24).",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/masks/gqa_masks.npz",
+      "encodingFormat": "application/octet-stream",
+      "contentSize": "1051666",
+      "sha256": "1cab94c93da9b2efce53608e5ae18578b611598b38008894832e108f4ec1bf70"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "vg_mask_npz",
+      "name": "vg_masks.npz",
+      "description": "VG-AS filtered patch-mask NPZ metadata; 3772 rows and coverage shape (3772, 24, 24).",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/masks/vg_masks.npz",
+      "encodingFormat": "application/octet-stream",
+      "contentSize": "1003249",
+      "sha256": "42ecad320d3830b0e456ffc800f93fb67732dd7aaf76b6b2bc183271b45e5b64"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "readme_md",
+      "name": "README.md",
+      "description": "Dataset card and usage notes.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/README.md",
+      "encodingFormat": "text/markdown",
+      "contentSize": "3254",
+      "sha256": "7b274c275e7099eb7b7937f4ba8bea135b22924ab0a1d7bbd0a023589e457a2c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "notice_md",
+      "name": "NOTICE.md",
+      "description": "Provenance, upstream-license, image-availability, and anonymity notice.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/NOTICE.md",
+      "encodingFormat": "text/markdown",
+      "contentSize": "759",
+      "sha256": "de79eb7b17d52f6f913ed81329e9e735a90aa223bfe8396f14b50f942ab9d807"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "license_txt",
+      "name": "LICENSE",
+      "description": "Custom research-data terms for the derived annotation and mask metadata package.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/LICENSE",
+      "encodingFormat": "text/plain",
+      "contentSize": "483",
+      "sha256": "4607468d45f5bc4fe3090c89554c2a331939b58d1ec777240ab8076da3e5df3c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "citation_cff",
+      "name": "CITATION.cff",
+      "description": "Citation metadata placeholder for the anonymous submission artifact.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/CITATION.cff",
+      "encodingFormat": "text/plain",
+      "contentSize": "154",
+      "sha256": "cfeec08e65b75d2919bc9e24eeddf281d0148df367488763d4a13a3e14bc083f"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "manifest_json",
+      "name": "manifest.json",
+      "description": "Machine-readable file manifest with counts, hashes, and release policy.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/manifest.json",
+      "encodingFormat": "application/json",
+      "contentSize": "7348",
+      "sha256": "269344f1a5fd518d29fe7c7a6ee8e9c95c06a03486cbf5a46e4b9fc75e6dbe78"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "summary_json",
+      "name": "summary.json",
+      "description": "Summary counts and upload-readiness checks.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/metadata/summary.json",
+      "encodingFormat": "application/json",
+      "contentSize": "2862",
+      "sha256": "fb817ce56e29022f11f589b7f6dd31bdb2dc71547c7e45f64fa1c909401b5388"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "scan_report_json",
+      "name": "upload_scan_report.json",
+      "description": "Public-release scan report for paths, credentials, and identity leakage.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/metadata/upload_scan_report.json",
+      "encodingFormat": "application/json",
+      "contentSize": "534",
+      "sha256": "ba783a94859154f60e4fffff96bb8ac7c0cb4e2445680e214bfdd4dc053acd02"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "sanitization_report_json",
+      "name": "upload_sanitization_report.json",
+      "description": "Detailed sanitization report for split files and mask metadata.",
+      "contentUrl": "https://huggingface.co/datasets/as-benchmark-artifacts/sage-as/resolve/main/metadata/upload_sanitization_report.json",
+      "encodingFormat": "application/json",
+      "contentSize": "6785",
+      "sha256": "ed7c8a1e5ab82681182a372881f4489dffefb70012ec6779d9187e2aca04f2db"
+    }
+  ],
+  "recordSet": [
+    {
+      "@type": "cr:RecordSet",
+      "@id": "split_summary",
+      "name": "split_summary",
+      "description": "Inline summary of all JSON/JSONL train, validation, and test split files.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/dataset",
+          "dataType": "sc:Text"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/split",
+          "dataType": "sc:Text"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/path",
+          "dataType": "sc:Text"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/records",
+          "dataType": "sc:Integer"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/answer_type_counts",
+          "dataType": "sc:Text"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/qwen_filter_applied_to_json",
+          "dataType": "sc:Boolean"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/raw_images_included",
+          "dataType": "sc:Boolean"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "split_summary/sha256",
+          "dataType": "sc:Text"
+        }
+      ],
+      "data": [
+        {
+          "split_summary/dataset": "vqa",
+          "split_summary/split": "train",
+          "split_summary/path": "data/vqa/train.json",
+          "split_summary/records": 97582,
+          "split_summary/answer_type_counts": "{\"number\": 7301, \"other\": 21452, \"yes/no\": 68829}",
+          "split_summary/qwen_filter_applied_to_json": false,
+          "split_summary/raw_images_included": false,
+          "split_summary/sha256": "0bcd812918a85f54355b8e2a6f3ddb8bc4bb63443e5f55d9fa177ebc63434684"
+        },
+        {
+          "split_summary/dataset": "vqa",
+          "split_summary/split": "val",
+          "split_summary/path": "data/vqa/val.json",
+          "split_summary/records": 12199,
+          "split_summary/answer_type_counts": "{\"number\": 913, \"other\": 2682, \"yes/no\": 8604}",
+          "split_summary/qwen_filter_applied_to_json": false,
+          "split_summary/raw_images_included": false,
+          "split_summary/sha256": "702400c28c38135d18e140b30edd45cee590bc5272b04544c28b50f069c6ebcc"
+        },
+        {
+          "split_summary/dataset": "vqa",
+          "split_summary/split": "test",
+          "split_summary/path": "data/vqa/test.json",
+          "split_summary/records": 12199,
+          "split_summary/answer_type_counts": "{\"number\": 913, \"other\": 2682, \"yes/no\": 8604}",
+          "split_summary/qwen_filter_applied_to_json": false,
+          "split_summary/raw_images_included": false,
+          "split_summary/sha256": "3d143faf31d04f03c0002466eb6941a1eb4e391f73f5e3ec6ddefd848ae93653"
+        },
+        {
+          "split_summary/dataset": "gqa",
+          "split_summary/split": "train",
+          "split_summary/path": "data/gqa/train.jsonl",
+          "split_summary/records": 8007,
+          "split_summary/answer_type_counts": "{\"other\": 4340, \"yes/no\": 3667}",
+          "split_summary/qwen_filter_applied_to_json": false,
+          "split_summary/raw_images_included": false,
+          "split_summary/sha256": "dbd2b8f3e0d4a07cd962d3bbbdb0b9aca4eeee6c4ab99db88817895834d717a4"
+        },
+        {
+          "split_summary/dataset": "gqa",
+          "split_summary/split": "val",
+          "split_summary/path": "data/gqa/val.jsonl",
+          "split_summary/records": 1010,
+          "split_summary/answer_type_counts": "{\"other\": 540, \"yes/no\": 470}",
+          "split_summary/qwen_filter_applied_to_json": false,
+          "split_summary/raw_images_included": false,
+          "split_summary/sha256": "8d5135fc6637a5b059a41b77aac15201a28d5a88938a69d8f339feac16fb9546"
+        },
+        {
+          "split_summary/dataset": "gqa",
+          "split_summary/split": "test",
+          "split_summary/path": "data/gqa/test.jsonl",
+          "split_summary/records": 983,
+          "split_summary/answer_type_counts": "{\"other\": 530, \"yes/no\": 453}",
+          "split_summary/qwen_filter_applied_to_json": false,
+          "split_summary/raw_images_included": false,
+          "split_summary/sha256": "fa998ef8b1ec479034b3a16f6d06610460394a1de08ebb0be87067d0da06bc86"
+        },
+        {
+          "split_summary/dataset": "vg",
+          "split_summary/split": "train",
+          "split_summary/path": "data/vg/train.jsonl",
+          "split_summary/records": 8002,
+          "split_summary/answer_type_counts": "{\"number\": 2667, \"other\": 5335}",
+          "split_summary/qwen_filter_applied_to_json": false,
+          "split_summary/raw_images_included": false,
+          "split_summary/sha256": "039f094b6ddfd3a84dd974abf5d0f79b17fc2da1346c7be7f92a7d5528002543"
+        },
+        {
+          "split_summary/dataset": "vg",
+          "split_summary/split": "val",
+          "split_summary/path": "data/vg/val.jsonl",
+          "split_summary/records": 996,
+          "split_summary/answer_type_counts": "{\"number\": 329, \"other\": 667}",
+          "split_summary/qwen_filter_applied_to_json": false,
+          "split_summary/raw_images_included": false,
+          "split_summary/sha256": "e64e940e548f55895ae19de6bdedec6159413ae2e15cd2616da34a7aee21b653"
+        },
+        {
+          "split_summary/dataset": "vg",
+          "split_summary/split": "test",
+          "split_summary/path": "data/vg/test.jsonl",
+          "split_summary/records": 1002,
+          "split_summary/answer_type_counts": "{\"number\": 337, \"other\": 665}",
+          "split_summary/qwen_filter_applied_to_json": false,
+          "split_summary/raw_images_included": false,
+          "split_summary/sha256": "a1e018d4b999f350b4bbded72006001225e4239c43a909c6127ddd43d3688fc7"
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "mask_files",
+      "name": "mask_files",
+      "description": "Inline schema and statistics for released patch-mask NPZ files. The NPZ arrays include question_ids, image_ids, image_names, padding metadata, coverage_ratio with shape [N,24,24], and has_mask with shape [N,24,24].",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/dataset",
+          "dataType": "sc:Text"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/path",
+          "dataType": "sc:Text"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/npz_rows",
+          "dataType": "sc:Integer"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/coverage_shape",
+          "dataType": "sc:Text"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/grid_size",
+          "dataType": "sc:Integer"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/patch_size",
+          "dataType": "sc:Integer"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/qwen_filtered_rows_removed",
+          "dataType": "sc:Boolean"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/number_answer_rows_removed",
+          "dataType": "sc:Boolean"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/metadata_contains_local_path",
+          "dataType": "sc:Boolean"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/mask_pixel_count_min",
+          "dataType": "sc:Integer"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/mask_pixel_count_max",
+          "dataType": "sc:Integer"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/mask_pixel_count_mean",
+          "dataType": "sc:Float"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "mask_files/sha256",
+          "dataType": "sc:Text"
+        }
+      ],
+      "data": [
+        {
+          "mask_files/dataset": "vqa",
+          "mask_files/path": "masks/vqa_masks.npz",
+          "mask_files/npz_rows": 69884,
+          "mask_files/coverage_shape": "69884x24x24",
+          "mask_files/grid_size": 24,
+          "mask_files/patch_size": 14,
+          "mask_files/qwen_filtered_rows_removed": true,
+          "mask_files/number_answer_rows_removed": true,
+          "mask_files/metadata_contains_local_path": false,
+          "mask_files/mask_pixel_count_min": 0,
+          "mask_files/mask_pixel_count_max": 576,
+          "mask_files/mask_pixel_count_mean": 67.88933089119112,
+          "mask_files/sha256": "0b3dc0c629b96398557461f1353b9daaa0451ca2aed9af7fbd13308be73037af"
+        },
+        {
+          "mask_files/dataset": "gqa",
+          "mask_files/path": "masks/gqa_masks.npz",
+          "mask_files/npz_rows": 5461,
+          "mask_files/coverage_shape": "5461x24x24",
+          "mask_files/grid_size": 24,
+          "mask_files/patch_size": 14,
+          "mask_files/qwen_filtered_rows_removed": true,
+          "mask_files/number_answer_rows_removed": true,
+          "mask_files/metadata_contains_local_path": false,
+          "mask_files/mask_pixel_count_min": 0,
+          "mask_files/mask_pixel_count_max": 502,
+          "mask_files/mask_pixel_count_mean": 59.05310382713789,
+          "mask_files/sha256": "1cab94c93da9b2efce53608e5ae18578b611598b38008894832e108f4ec1bf70"
+        },
+        {
+          "mask_files/dataset": "vg",
+          "mask_files/path": "masks/vg_masks.npz",
+          "mask_files/npz_rows": 3772,
+          "mask_files/coverage_shape": "3772x24x24",
+          "mask_files/grid_size": 24,
+          "mask_files/patch_size": 14,
+          "mask_files/qwen_filtered_rows_removed": true,
+          "mask_files/number_answer_rows_removed": true,
+          "mask_files/metadata_contains_local_path": false,
+          "mask_files/mask_pixel_count_min": 0,
+          "mask_files/mask_pixel_count_max": 576,
+          "mask_files/mask_pixel_count_mean": 108.516967126193,
+          "mask_files/sha256": "42ecad320d3830b0e456ffc800f93fb67732dd7aaf76b6b2bc183271b45e5b64"
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "vqa_train",
+      "name": "vqa_train",
+      "description": "VQA-AS train split records from data/vqa/train.json (97582 examples). Raw or masked images are not included in this repository.",
+      "key": {
+        "@id": "vqa_train/question_id"
+      },
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_train/question_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_train_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].question_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_train/question",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_train_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].question"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_train/image_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_train_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].image_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_train/answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_train_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_train/answer_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_train_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].answer_type"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "vqa_val",
+      "name": "vqa_val",
+      "description": "VQA-AS val split records from data/vqa/val.json (12199 examples). Raw or masked images are not included in this repository.",
+      "key": {
+        "@id": "vqa_val/question_id"
+      },
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_val/question_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_val_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].question_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_val/question",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_val_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].question"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_val/image_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_val_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].image_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_val/answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_val_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_val/answer_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_val_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].answer_type"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "vqa_test",
+      "name": "vqa_test",
+      "description": "VQA-AS test split records from data/vqa/test.json (12199 examples). Raw or masked images are not included in this repository.",
+      "key": {
+        "@id": "vqa_test/question_id"
+      },
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_test/question_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_test_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].question_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_test/question",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_test_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].question"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_test/image_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_test_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].image_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_test/answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_test_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vqa_test/answer_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vqa_test_json"
+            },
+            "extract": {
+              "jsonPath": "$[*].answer_type"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "gqa_train",
+      "name": "gqa_train",
+      "description": "GQA-AS train split records from data/gqa/train.jsonl (8007 examples). Raw or masked images are not included in this repository.",
+      "key": {
+        "@id": "gqa_train/question_id"
+      },
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/question_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "question_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/image_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "image_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/image_path",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "image_path"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/text_keywords",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "text_keywords"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/visual_cues",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "visual_cues"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/original_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "original_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/generated_question",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "generated_question"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/generated_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "generated_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/timestamp",
+          "dataType": "sc:DateTime",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "timestamp"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_train/answer_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_train_jsonl"
+            },
+            "extract": {
+              "column": "answer_type"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "gqa_val",
+      "name": "gqa_val",
+      "description": "GQA-AS val split records from data/gqa/val.jsonl (1010 examples). Raw or masked images are not included in this repository.",
+      "key": {
+        "@id": "gqa_val/question_id"
+      },
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/question_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "question_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/image_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "image_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/image_path",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "image_path"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/text_keywords",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "text_keywords"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/visual_cues",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "visual_cues"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/original_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "original_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/generated_question",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "generated_question"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/generated_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "generated_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/timestamp",
+          "dataType": "sc:DateTime",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "timestamp"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_val/answer_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_val_jsonl"
+            },
+            "extract": {
+              "column": "answer_type"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "gqa_test",
+      "name": "gqa_test",
+      "description": "GQA-AS test split records from data/gqa/test.jsonl (983 examples). Raw or masked images are not included in this repository.",
+      "key": {
+        "@id": "gqa_test/question_id"
+      },
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/question_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "question_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/image_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "image_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/image_path",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "image_path"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/text_keywords",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "text_keywords"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/visual_cues",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "visual_cues"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/original_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "original_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/generated_question",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "generated_question"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/generated_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "generated_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/timestamp",
+          "dataType": "sc:DateTime",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "timestamp"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "gqa_test/answer_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "gqa_test_jsonl"
+            },
+            "extract": {
+              "column": "answer_type"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "vg_train",
+      "name": "vg_train",
+      "description": "VG-AS train split records from data/vg/train.jsonl (8002 examples). Raw or masked images are not included in this repository.",
+      "key": {
+        "@id": "vg_train/question_id"
+      },
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/question_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "question_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/image_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "image_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/image_path",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "image_path"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/text_keywords",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "text_keywords"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/visual_cues",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "visual_cues"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/original_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "original_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/generated_question",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "generated_question"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/generated_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "generated_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/timestamp",
+          "dataType": "sc:DateTime",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "timestamp"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_train/answer_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_train_jsonl"
+            },
+            "extract": {
+              "column": "answer_type"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "vg_val",
+      "name": "vg_val",
+      "description": "VG-AS val split records from data/vg/val.jsonl (996 examples). Raw or masked images are not included in this repository.",
+      "key": {
+        "@id": "vg_val/question_id"
+      },
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/question_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "question_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/image_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "image_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/image_path",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "image_path"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/text_keywords",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "text_keywords"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/visual_cues",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "visual_cues"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/original_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "original_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/generated_question",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "generated_question"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/generated_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "generated_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/timestamp",
+          "dataType": "sc:DateTime",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "timestamp"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_val/answer_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_val_jsonl"
+            },
+            "extract": {
+              "column": "answer_type"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "vg_test",
+      "name": "vg_test",
+      "description": "VG-AS test split records from data/vg/test.jsonl (1002 examples). Raw or masked images are not included in this repository.",
+      "key": {
+        "@id": "vg_test/question_id"
+      },
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/question_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "question_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/image_id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "image_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/image_path",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "image_path"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/text_keywords",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "text_keywords"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/visual_cues",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "visual_cues"
+            }
+          },
+          "isArray": true,
+          "arrayShape": "-1"
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/original_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "original_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/generated_question",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "generated_question"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/generated_answer",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "generated_answer"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/timestamp",
+          "dataType": "sc:DateTime",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "timestamp"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "vg_test/answer_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "vg_test_jsonl"
+            },
+            "extract": {
+              "column": "answer_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "prov:wasDerivedFrom": [
+    {
+      "@id": "https://visualqa.org/",
+      "prov:label": "VQA / VQA-AS derived annotations",
+      "sc:description": "Source-style visual question answering annotations and images used to construct the VQA-AS split metadata."
+    },
+    {
+      "@id": "https://cs.stanford.edu/people/dorarad/gqa/",
+      "prov:label": "GQA / GQA-AS derived annotations",
+      "sc:description": "Source-style visual reasoning annotations and images used to construct the GQA-AS split metadata."
+    },
+    {
+      "@id": "https://homes.cs.washington.edu/~ranjay/visualgenome/",
+      "prov:label": "Visual Genome / Visual Genome-AS derived annotations",
+      "sc:description": "Source-style dense image annotations and question-answer examples used to construct the Visual Genome-AS split metadata."
+    },
+    {
+      "@id": "https://cocodataset.org/",
+      "prov:label": "COCO-style image sources",
+      "sc:description": "Underlying image source for VQA-style examples where applicable; raw images are not redistributed in this package."
+    }
+  ],
+  "prov:wasGeneratedBy": [
+    {
+      "@type": "prov:Activity",
+      "prov:type": {
+        "@id": "https://www.wikidata.org/wiki/Q5227332"
+      },
+      "prov:label": "Shortcut-bias split construction and sanitization",
+      "sc:description": "Prepared train/validation/test JSON and JSONL splits for VQA-AS, GQA-AS, and Visual Genome-AS; preserved Qwen-filtered questions in JSON/JSONL split files; removed local absolute paths and machine-specific identifiers from public metadata.",
+      "prov:wasAttributedTo": [
+        {
+          "@type": "prov:SoftwareAgent",
+          "@id": "sage_as_preparation_pipeline",
+          "prov:label": "SAGE-AS preparation pipeline",
+          "sc:description": "Local preprocessing scripts used to assemble, split, filter, and sanitize the derived benchmark package."
+        }
+      ]
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:type": {
+        "@id": "https://www.wikidata.org/wiki/Q1172378"
+      },
+      "prov:label": "Qwen-based training-mask filtering",
+      "sc:description": "Question IDs filtered during the Qwen review step were removed from the released mask NPZ rows, while the JSON/JSONL question records were retained for transparency and evaluation consistency.",
+      "prov:wasAttributedTo": [
+        {
+          "@type": "prov:SoftwareAgent",
+          "@id": "qwen_filtering_agent",
+          "prov:label": "Qwen filtering step",
+          "sc:description": "Model-assisted filtering used in the training-mask preparation workflow."
+        }
+      ]
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:type": {
+        "@id": "https://www.wikidata.org/wiki/Q109719325"
+      },
+      "prov:label": "Patch-mask generation and filtering",
+      "sc:description": "Generated patch-level mask metadata from image masks using pad-to-square preprocessing and LLaVA 24x24 patch geometry. Number-answer rows are excluded only from the released mask NPZ files used for mask-supervision metadata; the corresponding QA records remain in the JSON/JSONL train, validation, and test splits. These masks are supervision metadata and should not be interpreted as exhaustive semantic segmentation annotations.",
+      "prov:wasAttributedTo": [
+        {
+          "@type": "prov:SoftwareAgent",
+          "@id": "sam_patch_mask_pipeline",
+          "prov:label": "SAM and patch-mask pipeline",
+          "sc:description": "Automated mask generation and conversion pipeline producing per-patch coverage ratios."
+        }
+      ]
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:type": {
+        "@id": "https://www.wikidata.org/wiki/Q3306762"
+      },
+      "prov:label": "Public-release compliance review",
+      "sc:description": "Checked the upload package for local path leakage, API keys, direct personal identifiers, and consistency with the documented split and NPZ counts before public hosting.",
+      "prov:wasAttributedTo": [
+        {
+          "@type": "prov:SoftwareAgent",
+          "@id": "release_compliance_scanner",
+          "prov:label": "Release compliance scanner",
+          "sc:description": "Automated local scan used to identify public-release compliance issues before upload."
+        }
+      ]
+    }
+  ],
+  "rai:dataLimitations": "SAGE-AS is a derived research benchmark for studying shortcut bias and mask-supervised gating in visual question answering. It contains annotation splits and patch-level mask metadata, but it does not include raw or masked images; users must obtain the corresponding upstream images separately. The benchmark is limited to English-language VQA-style questions derived from VQA-AS, GQA-AS, and Visual Genome-AS style sources, and should not be treated as a general-purpose VQA benchmark or as evidence of deployment readiness. The mask NPZ files are intended for research supervision/analysis only; they were filtered for the training setup and are not exhaustive object or semantic segmentation labels. Because image paths for some splits are sanitized placeholders, users must reconstruct image access from the upstream datasets and verify compatibility with their local data layout.",
+  "rai:dataBiases": "The data inherits selection, annotation, language, geographic, object-category, and scene-composition biases from the upstream VQA/GQA/Visual Genome and COCO-like image sources. It also inherits biases introduced by the shortcut construction pipeline, generated/re-written question-answer fields, Qwen-based filtering decisions, and SAM/patch-mask generation. The distribution intentionally emphasizes shortcut-sensitive examples, so model behavior measured on this benchmark may not reflect performance on ordinary VQA traffic. Number-answer rows are excluded only from the released mask NPZ files used for mask-supervision metadata; the corresponding QA records remain in the JSON/JSONL train, validation, and test splits. As a result, mask-supervision analyses using these NPZ files underrepresent number-type questions, while the annotation splits still retain number-answer examples.",
+  "rai:personalSensitiveInformation": "No personal or sensitive information was intentionally collected for this derived release, and the repository does not include raw images. However, the upstream image datasets may contain people, faces, locations, or other incidental sensitive visual content, and question/answer annotations may refer to visible attributes such as age, gender expression, clothing, activities, or scene context. Users must comply with upstream dataset terms and should perform their own privacy and sensitivity review before redistributing images or using the benchmark in settings involving people or sensitive attributes.",
+  "rai:dataUseCases": "Intended use cases are academic research and evaluation of shortcut bias, answer-shortcut reliance, robustness of vision-language models, and training or analysis of patch-level mask/gating supervision for VQA. Validated use in this release is benchmark-style offline evaluation and controlled research training with the provided splits and mask metadata. The dataset is not validated for production model deployment, surveillance, biometric inference, user profiling, safety-critical decision making, clinical or legal use, or broad measurement of visual reasoning ability outside the shortcut-bias setting.",
+  "rai:dataSocialImpact": "The intended positive impact is to make shortcut reliance in vision-language models easier to measure and reduce, which can improve scientific understanding of multimodal robustness. Potential risks include overclaiming that high benchmark performance implies general visual reasoning, using derived masks as ground-truth semantic labels, training models that inherit upstream dataset biases, or applying models evaluated on this benchmark in inappropriate real-world settings. Risk mitigations in this release include excluding raw images, sanitizing local paths and identifiers, documenting upstream-license dependence, and explicitly limiting the package to derived research annotations and mask metadata.",
+  "rai:hasSyntheticData": true
+}

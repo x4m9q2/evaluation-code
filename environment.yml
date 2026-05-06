@@ -1,0 +1,9 @@
+name: sage-repro
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - -r code/gemma_gate/gemma/requirements-py310.txt
+

@@ -1,0 +1,130 @@
+[
+  {
+    "question_id": 370242002,
+    "question": "Is the yellow platform edge to the left or right of the train?",
+    "image_id": 370242,
+    "answer": "left",
+    "answer_type": "other",
+    "shortcut_answer": "right"
+  },
+  {
+    "question_id": 309771002,
+    "question": "Is the skateboarder to the left of the bikes airborne right now?",
+    "image_id": 309771,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 306267002,
+    "question": "Are the water bottles beneath the counter all missing blue caps?",
+    "image_id": 306267,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 473506000,
+    "question": "Does the towel hanging under the central window appear blue?",
+    "image_id": 473506,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 241188003,
+    "question": "In this tidy kitchen, is there no stainless refrigerator on the right?",
+    "image_id": 241188,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 327271000,
+    "question": "Are any blue bollards knocked down beside the parked motorcycles on right?",
+    "image_id": 327271,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 416815010,
+    "question": "Is the computer mouse on the left side of the keyboard?",
+    "image_id": 416815,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 282835003,
+    "question": "On the right, is this house white with a wooden porch?",
+    "image_id": 282835,
+    "answer": "yes",
+    "answer_type": "yes/no",
+    "shortcut_answer": "no"
+  },
+  {
+    "question_id": 490978001,
+    "question": "Is the area surrounding the red hydrant at the intersection dry?",
+    "image_id": 490978,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 56262002,
+    "question": "How many ears are visible on the person's head at bottom?",
+    "image_id": 56262,
+    "answer": "1",
+    "answer_type": "number",
+    "shortcut_answer": "2"
+  },
+  {
+    "question_id": 140390003,
+    "question": "Is there a single red flower on a top-right branch against the sky?",
+    "image_id": 140390,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 547168003,
+    "question": "What is covering most of the sky above the ski trail?",
+    "image_id": 547168,
+    "answer": "clouds",
+    "answer_type": "other",
+    "shortcut_answer": "snow"
+  },
+  {
+    "question_id": 76493001,
+    "question": "Do you see any boats on the water to the far left, below the mountains?",
+    "image_id": 76493,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 47692000,
+    "question": "From left to right, is this sky consistently blue with no clouds?",
+    "image_id": 47692,
+    "answer": "yes",
+    "answer_type": "yes/no",
+    "shortcut_answer": "no"
+  },
+  {
+    "question_id": 418397017,
+    "question": "Is the batter to the left of the catcher wearing an orange helmet?",
+    "image_id": 418397,
+    "answer": "no",
+    "answer_type": "yes/no",
+    "shortcut_answer": "yes"
+  },
+  {
+    "question_id": 559073000,
+    "question": "To the right of the cat near the cabinet, what footwear lies on the floor?",
+    "image_id": 559073,
+    "answer": "sneaker",
+    "answer_type": "other",
+    "shortcut_answer": "suitcase"
+  }
+]

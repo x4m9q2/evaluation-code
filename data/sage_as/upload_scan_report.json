@@ -1,0 +1,13 @@
+{
+  "scan_result": "passed_with_one_natural_language_false_positive",
+  "local_absolute_paths_found": 0,
+  "local_machine_identifiers_found": 0,
+  "credential_like_values_found": 0,
+  "natural_language_false_positives": [
+    {
+      "file": "data/gqa/train.jsonl",
+      "description": "A normal English question contains the phrase \"obelisk-shaped\"; this is not a credential."
+    }
+  ],
+  "note": "This file intentionally avoids listing raw sensitive search patterns so that downstream scanners do not flag the report itself."
+}

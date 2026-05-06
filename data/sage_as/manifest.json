@@ -1,0 +1,201 @@
+{
+  "created_at_utc": "2026-05-04T02:25:47.256383+00:00",
+  "package_name": "SAGE-AS upload-ready data package",
+  "root": ".",
+  "policy": {
+    "json_splits": "Original train/val/test JSON or JSONL splits are copied unchanged except for path sanitization. Qwen-filtered questions are not removed from JSON.",
+    "mask_npz": "Only mask NPZ rows are filtered: rows absent from training-time Qwen keep lists or with answer_type == number are removed.",
+    "paths": "Absolute local paths were removed. GQA/VG image_path fields are relative placeholders; image files are not included.",
+    "images": "Raw or masked image files are not included. Users must obtain/prepare images separately under the terms of the original datasets."
+  },
+  "splits": [
+    {
+      "dataset": "vqa",
+      "split": "train",
+      "path": "data/vqa/train.json",
+      "records": 97582,
+      "answer_type_counts": {
+        "number": 7301,
+        "other": 21452,
+        "yes/no": 68829
+      },
+      "qwen_filter_applied_to_json": false,
+      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "absolute_or_local_path_fields_remaining": 0,
+      "bytes": 19062672,
+      "sha256": "0bcd812918a85f54355b8e2a6f3ddb8bc4bb63443e5f55d9fa177ebc63434684"
+    },
+    {
+      "dataset": "vqa",
+      "split": "val",
+      "path": "data/vqa/val.json",
+      "records": 12199,
+      "answer_type_counts": {
+        "number": 913,
+        "other": 2682,
+        "yes/no": 8604
+      },
+      "qwen_filter_applied_to_json": false,
+      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "absolute_or_local_path_fields_remaining": 0,
+      "bytes": 2384637,
+      "sha256": "702400c28c38135d18e140b30edd45cee590bc5272b04544c28b50f069c6ebcc"
+    },
+    {
+      "dataset": "vqa",
+      "split": "test",
+      "path": "data/vqa/test.json",
+      "records": 12199,
+      "answer_type_counts": {
+        "number": 913,
+        "other": 2682,
+        "yes/no": 8604
+      },
+      "qwen_filter_applied_to_json": false,
+      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "absolute_or_local_path_fields_remaining": 0,
+      "bytes": 2753670,
+      "sha256": "3d143faf31d04f03c0002466eb6941a1eb4e391f73f5e3ec6ddefd848ae93653"
+    },
+    {
+      "dataset": "gqa",
+      "split": "train",
+      "path": "data/gqa/train.jsonl",
+      "records": 8007,
+      "answer_type_counts": {
+        "other": 4340,
+        "yes/no": 3667
+      },
+      "qwen_filter_applied_to_json": false,
+      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "absolute_or_local_path_fields_remaining": 0,
+      "bytes": 2937802,
+      "sha256": "dbd2b8f3e0d4a07cd962d3bbbdb0b9aca4eeee6c4ab99db88817895834d717a4"
+    },
+    {
+      "dataset": "gqa",
+      "split": "val",
+      "path": "data/gqa/val.jsonl",
+      "records": 1010,
+      "answer_type_counts": {
+        "other": 540,
+        "yes/no": 470
+      },
+      "qwen_filter_applied_to_json": false,
+      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "absolute_or_local_path_fields_remaining": 0,
+      "bytes": 370643,
+      "sha256": "8d5135fc6637a5b059a41b77aac15201a28d5a88938a69d8f339feac16fb9546"
+    },
+    {
+      "dataset": "gqa",
+      "split": "test",
+      "path": "data/gqa/test.jsonl",
+      "records": 983,
+      "answer_type_counts": {
+        "other": 530,
+        "yes/no": 453
+      },
+      "qwen_filter_applied_to_json": false,
+      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "absolute_or_local_path_fields_remaining": 0,
+      "bytes": 360844,
+      "sha256": "fa998ef8b1ec479034b3a16f6d06610460394a1de08ebb0be87067d0da06bc86"
+    },
+    {
+      "dataset": "vg",
+      "split": "train",
+      "path": "data/vg/train.jsonl",
+      "records": 8002,
+      "answer_type_counts": {
+        "number": 2667,
+        "other": 5335
+      },
+      "qwen_filter_applied_to_json": false,
+      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "absolute_or_local_path_fields_remaining": 0,
+      "bytes": 2954202,
+      "sha256": "039f094b6ddfd3a84dd974abf5d0f79b17fc2da1346c7be7f92a7d5528002543"
+    },
+    {
+      "dataset": "vg",
+      "split": "val",
+      "path": "data/vg/val.jsonl",
+      "records": 996,
+      "answer_type_counts": {
+        "number": 329,
+        "other": 667
+      },
+      "qwen_filter_applied_to_json": false,
+      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "absolute_or_local_path_fields_remaining": 0,
+      "bytes": 368017,
+      "sha256": "e64e940e548f55895ae19de6bdedec6159413ae2e15cd2616da34a7aee21b653"
+    },
+    {
+      "dataset": "vg",
+      "split": "test",
+      "path": "data/vg/test.jsonl",
+      "records": 1002,
+      "answer_type_counts": {
+        "number": 337,
+        "other": 665
+      },
+      "qwen_filter_applied_to_json": false,
+      "image_path_policy": "local absolute paths removed; if present, image_path is a relative placeholder under masked_images/<dataset>/; image files are not included",
+      "absolute_or_local_path_fields_remaining": 0,
+      "bytes": 369928,
+      "sha256": "a1e018d4b999f350b4bbded72006001225e4239c43a909c6127ddd43d3688fc7"
+    }
+  ],
+  "masks": [
+    {
+      "dataset": "vqa",
+      "path": "masks/vqa_masks.npz",
+      "npz_rows": 69884,
+      "coverage_shape": [
+        69884,
+        24,
+        24
+      ],
+      "metadata_contains_local_path": false,
+      "mask_pixel_count_min": 0,
+      "mask_pixel_count_max": 576,
+      "mask_pixel_count_mean": 67.88933089119112,
+      "bytes": 13074117,
+      "sha256": "0b3dc0c629b96398557461f1353b9daaa0451ca2aed9af7fbd13308be73037af"
+    },
+    {
+      "dataset": "gqa",
+      "path": "masks/gqa_masks.npz",
+      "npz_rows": 5461,
+      "coverage_shape": [
+        5461,
+        24,
+        24
+      ],
+      "metadata_contains_local_path": false,
+      "mask_pixel_count_min": 0,
+      "mask_pixel_count_max": 502,
+      "mask_pixel_count_mean": 59.05310382713789,
+      "bytes": 1051666,
+      "sha256": "1cab94c93da9b2efce53608e5ae18578b611598b38008894832e108f4ec1bf70"
+    },
+    {
+      "dataset": "vg",
+      "path": "masks/vg_masks.npz",
+      "npz_rows": 3772,
+      "coverage_shape": [
+        3772,
+        24,
+        24
+      ],
+      "metadata_contains_local_path": false,
+      "mask_pixel_count_min": 0,
+      "mask_pixel_count_max": 576,
+      "mask_pixel_count_mean": 108.516967126193,
+      "bytes": 1003249,
+      "sha256": "42ecad320d3830b0e456ffc800f93fb67732dd7aaf76b6b2bc183271b45e5b64"
+    }
+  ]
+}

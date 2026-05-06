@@ -1,0 +1,10 @@
+modelscope
+transformers==4.51.3
+huggingface-hub<1.0
+accelerate
+fastapi
+uvicorn[standard]
+pillow
+sentencepiece
+protobuf>=3.20.0,<5
+safetensors

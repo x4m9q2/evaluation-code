@@ -1,0 +1,205 @@
+from pathlib import Path
+
+DEBUG_DIR = Path(__file__).resolve().parent
+BUNDLE_ROOT = DEBUG_DIR.parents[1]
+import os
+import torch
+from transformers import AutoProcessor, Gemma3ForConditionalGeneration, logging as hf_logging
+
+from src.dataset import make_dpo_data_module
+from src.params import DataArguments, DPOArguments
+from monkey_patch_forward import replace_gemma3_forward, _get_gated_projected_image_features
+from train.train_dpo import configure_llm, configure_vision_tower
+from train.train_sft import configure_dual_input_gate, maybe_restore_dual_input_gate_from_checkpoint
+from trl.trainer.utils import flush_left, pad_to_length
+
+
+hf_logging.set_verbosity_error()
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+replace_gemma3_forward(use_liger=False)
+
+MODEL_ID = os.environ.get(
+    "MODEL_ID",
+    str(BUNDLE_ROOT / "checkpoints/gemma3_4b_stage2_gate_l1_mask_sdpa"),
+)
+DATA_PATH = os.environ.get(
+    "DATA_PATH",
+    str(DEBUG_DIR / "test_raw_with_shortcut_answer_16.json"),
+)
+IMAGE_FOLDER = os.environ.get("IMAGE_FOLDER", str(BUNDLE_ROOT / "data/playground_data/coco/train2014"))
+GATE_TEXT_MODEL_ID = os.environ.get("GATE_TEXT_MODEL_ID", str(BUNDLE_ROOT / "models/siglip-so400m-patch14-384"))
+ATTN = os.environ.get("ATTN", "eager")
+DTYPE = torch.bfloat16
+INCLUDE_TTI = os.environ.get("TTI", "0") == "1"
+
+
+def stat(name, tensor, active_rows=None):
+    x = tensor.detach()
+    if active_rows is not None and x.ndim >= 3:
+        flat = x.reshape(-1, x.shape[-1])
+        x = flat.index_select(0, active_rows)
+    finite = torch.isfinite(x)
+    xf = torch.nan_to_num(x.float())
+    print(
+        f"[stat] {name} shape={tuple(x.shape)} dtype={x.dtype} finite={bool(finite.all().item())} "
+        f"nan={int(torch.isnan(x).sum().item())} inf={int(torch.isinf(x).sum().item())} "
+        f"min={float(xf.amin().item())} max={float(xf.amax().item())} mean={float(xf.mean().item())}",
+        flush=True,
+    )
+
+
+def load_model():
+    args = DPOArguments(
+        output_dir=str(DEBUG_DIR / "probe_out"),
+        use_dual_input_gate=True,
+        gate_text_model_id=GATE_TEXT_MODEL_ID,
+        freeze_gate_text_encoder=True,
+        freeze_llm=False,
+        freeze_vision_tower=True,
+        freeze_projector=False,
+        disable_flash_attn2=True,
+        attn_implementation=ATTN,
+        bf16=True,
+        per_device_train_batch_size=1,
+        gradient_accumulation_steps=1,
+        remove_unused_columns=False,
+        gradient_checkpointing=False,
+        report_to=[],
+    )
+    model = Gemma3ForConditionalGeneration.from_pretrained(
+        MODEL_ID,
+        torch_dtype=DTYPE,
+        attn_implementation=ATTN,
+    ).cuda()
+    configure_llm(model, args)
+    configure_vision_tower(model, args, DTYPE, torch.device("cuda"))
+    gate_tok = configure_dual_input_gate(model, args, DTYPE)
+    maybe_restore_dual_input_gate_from_checkpoint(model, MODEL_ID)
+    model.siglip_text_model.to(device="cuda", dtype=DTYPE)
+    model.gate.to(device="cuda", dtype=DTYPE)
+    model.config.use_cache = False
+    model.eval()
+    return model, gate_tok
+
+
+def build_inputs(gate_tok):
+    processor = AutoProcessor.from_pretrained(MODEL_ID)
+    module = make_dpo_data_module(
+        processor,
+        DataArguments(data_path=DATA_PATH, image_folder=IMAGE_FOLDER, lazy_preprocess=True),
+        gate_text_tokenizer=gate_tok,
+        gate_text_max_length=64,
+    )
+    batch = module["data_collator"]([module["train_dataset"][0]])
+    for k, v in list(batch.items()):
+        if torch.is_tensor(v):
+            batch[k] = v.cuda()
+
+    prompt_input_ids = torch.cat([batch["prompt_input_ids"], batch["prompt_input_ids"]], dim=0)
+    prompt_attention_mask = torch.cat([batch["prompt_attention_mask"], batch["prompt_attention_mask"]], dim=0)
+    pixel_values = torch.cat([batch["pixel_values"], batch["pixel_values"]], dim=0)
+    gate_input_ids = torch.cat([batch["gate_input_ids"], batch["gate_input_ids"]], dim=0)
+    gate_attention_mask = torch.cat([batch["gate_attention_mask"], batch["gate_attention_mask"]], dim=0)
+    max_completion_length = max(batch["chosen_input_ids"].shape[1], batch["rejected_input_ids"].shape[1])
+    completion_input_ids = torch.cat(
+        [
+            pad_to_length(batch["chosen_input_ids"], max_completion_length, pad_value=processor.tokenizer.pad_token_id),
+            pad_to_length(batch["rejected_input_ids"], max_completion_length, pad_value=processor.tokenizer.pad_token_id),
+        ],
+        dim=0,
+    )
+    completion_attention_mask = torch.cat(
+        [
+            pad_to_length(batch["chosen_attention_mask"], max_completion_length, pad_value=0),
+            pad_to_length(batch["rejected_attention_mask"], max_completion_length, pad_value=0),
+        ],
+        dim=0,
+    )
+    input_ids = torch.cat([prompt_input_ids, completion_input_ids], dim=1)
+    attention_mask = torch.cat([prompt_attention_mask, completion_attention_mask], dim=1)
+    loss_mask = torch.cat([torch.zeros_like(prompt_attention_mask), completion_attention_mask], dim=1)
+    items = [attention_mask, input_ids, loss_mask]
+    token_type_ids = None
+    if INCLUDE_TTI:
+        prompt_token_type_ids = torch.cat([batch["token_type_ids"], batch["token_type_ids"]], dim=0)
+        completion_token_type_ids = torch.zeros_like(completion_input_ids)
+        token_type_ids = torch.cat([prompt_token_type_ids, completion_token_type_ids], dim=1)
+        items.append(token_type_ids)
+    flushed = flush_left(*items)
+    attention_mask, input_ids, loss_mask = flushed[:3]
+    if INCLUDE_TTI:
+        token_type_ids = flushed[3]
+    active_rows = torch.roll(loss_mask, shifts=-1, dims=1).bool().reshape(-1).nonzero(as_tuple=False).squeeze(1)
+    return {
+        "input_ids": input_ids,
+        "attention_mask": attention_mask,
+        "loss_mask": loss_mask,
+        "token_type_ids": token_type_ids,
+        "pixel_values": pixel_values,
+        "gate_input_ids": gate_input_ids,
+        "gate_attention_mask": gate_attention_mask,
+        "active_rows": active_rows,
+    }
+
+
+def main():
+    print(f"[start] ATTN={ATTN} TTI={INCLUDE_TTI}", flush=True)
+    model, gate_tok = load_model()
+    inputs = build_inputs(gate_tok)
+    stat("pixel_values", inputs["pixel_values"])
+    with torch.no_grad(), torch.autocast("cuda", dtype=DTYPE):
+        vision = model.vision_tower(pixel_values=inputs["pixel_values"]).last_hidden_state
+        stat("vision_last_hidden", vision)
+        text_outputs = model.siglip_text_model(
+            input_ids=inputs["gate_input_ids"],
+            attention_mask=inputs["gate_attention_mask"],
+            return_dict=True,
+        )
+        text_feat = text_outputs.pooler_output if text_outputs.pooler_output is not None else text_outputs.last_hidden_state.mean(dim=1)
+        stat("gate_text_feat", text_feat)
+        projected, patch_values = _get_gated_projected_image_features(
+            model,
+            inputs["pixel_values"],
+            gate_input_ids=inputs["gate_input_ids"],
+            gate_attention_mask=inputs["gate_attention_mask"],
+        )
+        stat("patch_values_for_loss", patch_values)
+        stat("projected_image_features", projected)
+
+        llm_ids = inputs["input_ids"].clone()
+        llm_ids[llm_ids == model.config.image_token_index] = 0
+        embeds = model.get_input_embeddings()(llm_ids)
+        mask = (inputs["input_ids"] == model.config.image_token_index).unsqueeze(-1).expand_as(embeds)
+        merged = embeds.masked_scatter(mask, projected.to(embeds.device, embeds.dtype))
+        stat("inputs_embeds_all", merged)
+        stat("inputs_embeds_active_rows", merged, inputs["active_rows"])
+
+        cache_position = torch.arange(0, merged.shape[1], device=merged.device)
+        causal_mask = model._update_causal_mask(
+            inputs["attention_mask"],
+            inputs["token_type_ids"],
+            None,
+            cache_position,
+            merged,
+            False,
+        )
+        stat("causal_mask", causal_mask)
+
+        outputs = model.language_model(
+            attention_mask=causal_mask,
+            inputs_embeds=merged,
+            use_cache=False,
+            output_hidden_states=True,
+            return_dict=True,
+            cache_position=cache_position,
+        )
+        for idx, hidden in enumerate(outputs.hidden_states):
+            stat(f"hidden_{idx}_active", hidden, inputs["active_rows"])
+            if not bool(torch.isfinite(hidden.reshape(-1, hidden.shape[-1]).index_select(0, inputs["active_rows"])).all().item()):
+                break
+        logits = outputs.logits
+        stat("logits_active", logits, inputs["active_rows"])
+
+
+if __name__ == "__main__":
+    main()

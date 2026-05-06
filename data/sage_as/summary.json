@@ -1,0 +1,119 @@
+{
+  "output_dir": ".",
+  "split_records": [
+    {
+      "dataset": "vqa",
+      "split": "train",
+      "records": 97582,
+      "answer_type_counts": {
+        "number": 7301,
+        "other": 21452,
+        "yes/no": 68829
+      },
+      "qwen_filter_applied_to_json": false,
+      "absolute_or_local_path_fields_remaining": 0
+    },
+    {
+      "dataset": "vqa",
+      "split": "val",
+      "records": 12199,
+      "answer_type_counts": {
+        "number": 913,
+        "other": 2682,
+        "yes/no": 8604
+      },
+      "qwen_filter_applied_to_json": false,
+      "absolute_or_local_path_fields_remaining": 0
+    },
+    {
+      "dataset": "vqa",
+      "split": "test",
+      "records": 12199,
+      "answer_type_counts": {
+        "number": 913,
+        "other": 2682,
+        "yes/no": 8604
+      },
+      "qwen_filter_applied_to_json": false,
+      "absolute_or_local_path_fields_remaining": 0
+    },
+    {
+      "dataset": "gqa",
+      "split": "train",
+      "records": 8007,
+      "answer_type_counts": {
+        "other": 4340,
+        "yes/no": 3667
+      },
+      "qwen_filter_applied_to_json": false,
+      "absolute_or_local_path_fields_remaining": 0
+    },
+    {
+      "dataset": "gqa",
+      "split": "val",
+      "records": 1010,
+      "answer_type_counts": {
+        "other": 540,
+        "yes/no": 470
+      },
+      "qwen_filter_applied_to_json": false,
+      "absolute_or_local_path_fields_remaining": 0
+    },
+    {
+      "dataset": "gqa",
+      "split": "test",
+      "records": 983,
+      "answer_type_counts": {
+        "other": 530,
+        "yes/no": 453
+      },
+      "qwen_filter_applied_to_json": false,
+      "absolute_or_local_path_fields_remaining": 0
+    },
+    {
+      "dataset": "vg",
+      "split": "train",
+      "records": 8002,
+      "answer_type_counts": {
+        "number": 2667,
+        "other": 5335
+      },
+      "qwen_filter_applied_to_json": false,
+      "absolute_or_local_path_fields_remaining": 0
+    },
+    {
+      "dataset": "vg",
+      "split": "val",
+      "records": 996,
+      "answer_type_counts": {
+        "number": 329,
+        "other": 667
+      },
+      "qwen_filter_applied_to_json": false,
+      "absolute_or_local_path_fields_remaining": 0
+    },
+    {
+      "dataset": "vg",
+      "split": "test",
+      "records": 1002,
+      "answer_type_counts": {
+        "number": 337,
+        "other": 665
+      },
+      "qwen_filter_applied_to_json": false,
+      "absolute_or_local_path_fields_remaining": 0
+    }
+  ],
+  "mask_rows": {
+    "vqa": 69884,
+    "gqa": 5461,
+    "vg": 3772
+  },
+  "mask_metadata_contains_local_path": {
+    "vqa": false,
+    "gqa": false,
+    "vg": false
+  },
+  "upload_ready": true,
+  "notes": "Local absolute paths have been removed from public metadata and data files. One remaining scanner hit is a natural-language substring in an English question, not a credential."
+}
