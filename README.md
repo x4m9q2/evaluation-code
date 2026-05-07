@@ -294,6 +294,14 @@ bash scripts/run_qwen_visual_cue_filter.sh vg
 Qwen filtering only affects NPZ mask rows and whether mask loss is enabled
 during training. It does not delete QA samples from JSON or JSONL.
 
+Run Qwen filtering before the mask generation/filter/build steps below. The
+scripts are intended to be executed in order:
+
+- `run_qwen_visual_cue_filter.sh`
+- `run_mask_generation_and_filtering.sh ...-generate`
+- `run_mask_generation_and_filtering.sh ...-filter`
+- `run_mask_generation_and_filtering.sh ...-build`
+
 #### 3.2.6 Mask NPZ Generation
 
 VQA mask generation, filtering, and packaging:
@@ -303,6 +311,10 @@ bash scripts/run_mask_generation_and_filtering.sh vqa-generate
 bash scripts/run_mask_generation_and_filtering.sh vqa-filter
 bash scripts/run_mask_generation_and_filtering.sh vqa-build
 ```
+
+These three wrapper commands are not independent. `vqa-filter` consumes the
+Qwen keep/remove decisions, and `vqa-build` consumes the outputs of the earlier
+steps to produce the final stage-2 SFT JSON plus NPZ package.
 
 `vqa-build` uses only `data/shortcut_pipeline/vqa_v2_cmsv/train.json` as the
 generated-train source for supervised rows. Original no-mask rows are rebuilt
@@ -328,6 +340,9 @@ bash scripts/run_mask_generation_and_filtering.sh gqa-vg-generate
 bash scripts/run_mask_generation_and_filtering.sh gqa-vg-filter
 bash scripts/run_mask_generation_and_filtering.sh gqa-vg-build
 ```
+
+As with VQA, run these in order after the corresponding Qwen filtering step for
+GQA or VG.
 
 Mask rules:
 
@@ -586,6 +601,14 @@ bash scripts/run_mask_generation_and_filtering.sh vqa-build
 As with LLaVA, filtering only affects NPZ mask rows and whether mask loss is
 enabled. It does not remove QA rows.
 
+Run the shared Qwen filtering step before the NPZ generation/filter/build
+pipeline. The intended order is the same as in the LLaVA section:
+
+- `run_qwen_visual_cue_filter.sh`
+- `run_mask_generation_and_filtering.sh ...-generate`
+- `run_mask_generation_and_filtering.sh ...-filter`
+- `run_mask_generation_and_filtering.sh ...-build`
+
 #### 4.2.6 Mask NPZ Generation
 
 Gemma reads the NPZ pointed to by `PATCH_MASK_ANALYSIS_PATH` and matches rows by
@@ -597,10 +620,15 @@ bash scripts/run_mask_generation_and_filtering.sh vqa-filter
 bash scripts/run_mask_generation_and_filtering.sh vqa-build
 ```
 
+`vqa-filter` depends on the Qwen filtering outputs, and `vqa-build` packages
+the earlier outputs into the final stage-2 training JSON plus NPZ used by
+Gemma.
+
 GQA/VG:
 
 ```bash
 bash scripts/run_mask_generation_and_filtering.sh gqa-vg-generate
+bash scripts/run_mask_generation_and_filtering.sh gqa-vg-filter
 bash scripts/run_mask_generation_and_filtering.sh gqa-vg-build
 ```
 
