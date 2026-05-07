@@ -38,7 +38,7 @@ run_or_echo "${PYTHON_BIN}" -m deepspeed.launcher.runner --master_port "${MASTER
   --mm_projector_type mlp2x_gelu \
   --mm_vision_select_layer -2 \
   --output_dir "${OUTPUT_DIR}" \
-  --num_train_epochs "${NUM_EPOCHS:-3}" \
+  --num_train_epochs "${NUM_EPOCHS:-2}" \
   --per_device_train_batch_size "${PER_DEVICE_TRAIN_BATCH_SIZE:-2}" \
   --per_device_eval_batch_size "${PER_DEVICE_EVAL_BATCH_SIZE:-2}" \
   --gradient_accumulation_steps "${GRADIENT_ACCUMULATION_STEPS:-4}" \
