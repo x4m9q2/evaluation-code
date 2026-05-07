@@ -50,8 +50,6 @@ General rules:
   accumulation, precision, learning-rate schedule, or `max_steps`. Those
   parameters affect numerical stability and the effective learning-rate curve;
   unvalidated combinations may trigger NaN or Inf.
-- If you need a proxy for downloads, set it only in the current shell. Do not
-  hard-code local proxy addresses or credentials in code or docs.
 
 ## 2. Dataset Generation
 
