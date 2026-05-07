@@ -277,15 +277,15 @@ sample_seed = f(base_seed, question_id)
 
 | 作用 | 相对路径 | 当前绝对路径 | 迁移时是否必须 |
 |---|---|---|---|
-| Gemma 3 + CausalMM 核心实现 | `CausalMM/llava-1.5/gemma3/causalmm_gemma3.py` | `code/beaf_causalmm/gemma3/causalmm_gemma3.py` | 必须 |
-| 单图命令行入口 | `CausalMM/llava-1.5/gemma3/chat_gemma3_causalmm.py` | `code/beaf_causalmm/gemma3/chat_gemma3_causalmm.py` | 按需 |
-| CausalMM API 服务 | `CausalMM/llava-1.5/gemma3/api_gemma3_causalmm.py` | `code/beaf_causalmm/gemma3/api_gemma3_causalmm.py` | 按需 |
-| 启动 CausalMM API 的脚本 | `CausalMM/llava-1.5/gemma3/run_causalmm_server.sh` | `code/beaf_causalmm/gemma3/run_causalmm_server.sh` | 按需 |
-| 普通 CausalMM 评测脚本 | `CausalMM/llava-1.5/gemma3/eval_test_raw_gemma3_causalmm.py` | `code/beaf_causalmm/gemma3/eval_test_raw_gemma3_causalmm.py` | 做评测时需要 |
-| vision attention shuffle 评测脚本 | `CausalMM/llava-1.5/gemma3/eval_test_raw_gemma3_attn_shuffle.py` | `code/beaf_causalmm/gemma3/eval_test_raw_gemma3_attn_shuffle.py` | 做 `attn_shuffle` 实验时需要 |
-| 分片结果合并脚本 | `CausalMM/llava-1.5/gemma3/merge_eval_test_raw_shards.py` | `code/beaf_causalmm/gemma3/merge_eval_test_raw_shards.py` | 做多卡分片评测时需要 |
-| 4 卡运行脚本 | `CausalMM/llava-1.5/gemma3/run_eval_test_raw_gemma3_attn_shuffle_4gpu.sh` | `code/beaf_causalmm/gemma3/run_eval_test_raw_gemma3_attn_shuffle_4gpu.sh` | 做 4 卡 `attn_shuffle` 时需要 |
-| 目录说明 | `CausalMM/llava-1.5/gemma3/README.md` | `code/beaf_causalmm/gemma3/README.md` | 可选 |
+| Gemma 3 + CausalMM 核心实现 | `CausalMM/llava-1.5/gemma3/causalmm_gemma3.py` | `code/causalmm_gemma3/gemma3/causalmm_gemma3.py` | 必须 |
+| 单图命令行入口 | `CausalMM/llava-1.5/gemma3/chat_gemma3_causalmm.py` | `code/causalmm_gemma3/gemma3/chat_gemma3_causalmm.py` | 按需 |
+| CausalMM API 服务 | `CausalMM/llava-1.5/gemma3/api_gemma3_causalmm.py` | `code/causalmm_gemma3/gemma3/api_gemma3_causalmm.py` | 按需 |
+| 启动 CausalMM API 的脚本 | `CausalMM/llava-1.5/gemma3/run_causalmm_server.sh` | `code/causalmm_gemma3/gemma3/run_causalmm_server.sh` | 按需 |
+| 普通 CausalMM 评测脚本 | `CausalMM/llava-1.5/gemma3/eval_test_raw_gemma3_causalmm.py` | `code/causalmm_gemma3/gemma3/eval_test_raw_gemma3_causalmm.py` | 做评测时需要 |
+| vision attention shuffle 评测脚本 | `CausalMM/llava-1.5/gemma3/eval_test_raw_gemma3_attn_shuffle.py` | `code/causalmm_gemma3/gemma3/eval_test_raw_gemma3_attn_shuffle.py` | 做 `attn_shuffle` 实验时需要 |
+| 分片结果合并脚本 | `CausalMM/llava-1.5/gemma3/merge_eval_test_raw_shards.py` | `code/causalmm_gemma3/gemma3/merge_eval_test_raw_shards.py` | 做多卡分片评测时需要 |
+| 4 卡运行脚本 | `CausalMM/llava-1.5/gemma3/run_eval_test_raw_gemma3_attn_shuffle_4gpu.sh` | `code/causalmm_gemma3/gemma3/run_eval_test_raw_gemma3_attn_shuffle_4gpu.sh` | 做 4 卡 `attn_shuffle` 时需要 |
+| 目录说明 | `CausalMM/llava-1.5/gemma3/README.md` | `code/causalmm_gemma3/gemma3/README.md` | 可选 |
 
 ### 4.2 Gemma 3 的本地基础部署代码
 
@@ -314,9 +314,9 @@ sample_seed = f(base_seed, question_id)
 
 | 作用 | 相对路径 | 当前绝对路径 | 迁移时是否必须 |
 |---|---|---|---|
-| 原始单分支 CausalMM 解码参考 | `CausalMM/llava-1.5/causalmm_cf/causalmm_sm.py` | `code/beaf_causalmm/causalmm_cf/causalmm_sm.py` | 可选 |
-| 原始多分支 CausalMM 解码参考 | `CausalMM/llava-1.5/causalmm_cf/causalmm_mm.py` | `code/beaf_causalmm/causalmm_cf/causalmm_mm.py` | 可选 |
-| 原始项目说明 | `CausalMM/README.md` | `code/beaf_causalmm/README.md` | 可选 |
+| 原始单分支 CausalMM 解码参考 | `CausalMM/llava-1.5/causalmm_cf/causalmm_sm.py` | `code/causalmm_gemma3/causalmm_cf/causalmm_sm.py` | 可选 |
+| 原始多分支 CausalMM 解码参考 | `CausalMM/llava-1.5/causalmm_cf/causalmm_mm.py` | `code/causalmm_gemma3/causalmm_cf/causalmm_mm.py` | 可选 |
+| 原始项目说明 | `CausalMM/README.md` | `code/causalmm_gemma3/README.md` | 可选 |
 
 ## 5. 迁移时最少要拷哪些东西
 

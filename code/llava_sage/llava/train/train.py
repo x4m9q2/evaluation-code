@@ -1273,7 +1273,7 @@ def train(attn_implementation=None):
                 if hasattr(module, 'weight'):
                     if training_args.bf16 and module.weight.dtype == torch.float32:
                         module = module.to(torch.bfloat16)
-    clip_tokenizer = CLIPTokenizer.from_pretrained("./clip-vit-large-patch14-336")
+    clip_tokenizer = CLIPTokenizer.from_pretrained(model_args.vision_tower)
     data_module = make_supervised_data_module(clip_tokenizer=clip_tokenizer,tokenizer=tokenizer,
                                               data_args=data_args)
     trainer = LLaVATrainer(model=model,

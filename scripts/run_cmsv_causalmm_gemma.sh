@@ -3,7 +3,7 @@ set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
-CAUSALMM_DIR="${BUNDLE_ROOT}/code/beaf_causalmm/gemma3"
+CAUSALMM_DIR="${BUNDLE_ROOT}/code/causalmm_gemma3/gemma3"
 SAGE_AS_ROOT="${SAGE_AS_ROOT:-${BUNDLE_ROOT}/data/sage_as}"
 CMSV_DATASET="${CMSV_DATASET:-vqa}"
 MODEL_PATH="${MODEL_PATH:-${BASE_MODEL_ID}}"

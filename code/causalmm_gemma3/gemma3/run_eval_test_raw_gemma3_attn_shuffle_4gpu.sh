@@ -6,10 +6,10 @@ BUNDLE_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 cd "$SCRIPT_DIR"
 
 MODEL_PATH="${BUNDLE_ROOT}/models/Gemma-3-4B-IT"
-QUESTION_FILE="${BUNDLE_ROOT}/outputs/beaf_causalmm/test_raw_llava.jsonl"
+QUESTION_FILE="${BUNDLE_ROOT}/outputs/causalmm_gemma3/test_raw_llava.jsonl"
 ANSWER_FILE="${BUNDLE_ROOT}/data/eval/test_raw_with_shortcut_answer.json"
 IMAGE_FOLDER="${BUNDLE_ROOT}/data/playground_data/coco/train2014"
-OUT_DIR="${BUNDLE_ROOT}/outputs/beaf_causalmm/gemma3_attn_shuffle_4gpu"
+OUT_DIR="${BUNDLE_ROOT}/outputs/causalmm_gemma3/gemma3_attn_shuffle_4gpu"
 BASE_NAME="${BASE_NAME:-gemma3_attn_shuffle_test_raw_results}"
 
 MAX_NEW_TOKENS="${MAX_NEW_TOKENS:-8}"

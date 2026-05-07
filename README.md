@@ -512,13 +512,6 @@ MODEL_PATH=checkpoints/llava_stage2_sage_vqa \
 bash scripts/run_pope_eval.sh
 ```
 
-CausalMM-LLaVA POPE:
-
-```bash
-MODEL_PATH=models/llava-v1.5-7b \
-bash scripts/run_pope_causalmm_llava.sh
-```
-
 BEAF:
 
 ```bash
@@ -527,7 +520,10 @@ bash scripts/run_beaf_eval.sh
 ```
 
 Raw POPE/BEAF data and images are not redistributed in this repository and must
-be obtained separately under their original terms.
+be obtained separately under their original terms. Place the local POPE files at
+`data/pope/llava_pope_test.jsonl`, `data/pope/coco/`, and `data/pope/val2014/`.
+Place the local BEAF files at `data/beaf/beaf_qna.json` and
+`data/beaf/images/`.
 
 ## 4. Gemma Experiments
 
@@ -749,7 +745,7 @@ Main dependency notes:
   are not redistributed here.
 - CausalMM-LLaVA code is under `code/evaluation/causalmm_llava/`; keep its
   license notice and cite the CausalMM paper when using it.
-- The Gemma CausalMM adaptation is under `code/beaf_causalmm/gemma3/` and is an
+- The Gemma CausalMM adaptation is under `code/causalmm_gemma3/gemma3/` and is an
   adaptation of the counterfactual decoding idea to Gemma.
 - Download the official NaPO repository from
   `https://github.com/zhangzef/NaPO`, extract it without renaming, and place

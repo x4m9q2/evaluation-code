@@ -14,6 +14,7 @@ from transformers import CLIPTokenizer
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
 from llava.model.builder import load_pretrained_model
+from llava.model.multimodal_encoder.builder import _resolve_local_vision_tower
 from llava.utils import disable_torch_init
 from llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
 
@@ -241,7 +242,8 @@ def eval_model(args):
             f"Failed to initialize image_processor for model {model_path}. "
             "Please make sure the checkpoint includes a valid vision tower config."
         )
-    clip_tokenizer = CLIPTokenizer.from_pretrained(model.config.mm_vision_tower)
+    resolved_vision_tower = _resolve_local_vision_tower(model.config.mm_vision_tower, model.config)
+    clip_tokenizer = CLIPTokenizer.from_pretrained(resolved_vision_tower)
     clip_eos_token_id = clip_tokenizer.eos_token_id
 
     questions = [json.loads(q) for q in open(os.path.expanduser(args.question_file), "r")]

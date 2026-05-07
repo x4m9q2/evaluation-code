@@ -10,6 +10,7 @@ from typing import Dict, Iterable, List, Tuple
 SCRIPT_PATH = Path(__file__).resolve()
 BUNDLE_ROOT = SCRIPT_PATH.parents[3]
 LLAVA_CODE_ROOT = BUNDLE_ROOT / "code/llava_sage"
+DEFAULT_VISION_TOWER = BUNDLE_ROOT / "models/clip-vit-large-patch14-336"
 
 
 def parse_args() -> argparse.Namespace:
@@ -19,6 +20,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--question-file", type=Path, default=BUNDLE_ROOT / "data/pope/llava_pope_test.jsonl")
     parser.add_argument("--annotation-dir", type=Path, default=BUNDLE_ROOT / "data/pope/coco")
     parser.add_argument("--image-folder", type=Path, default=BUNDLE_ROOT / "data/pope/val2014")
+    parser.add_argument("--vision-tower", type=Path, default=DEFAULT_VISION_TOWER)
     parser.add_argument("--output-root", type=Path, default=BUNDLE_ROOT / "outputs/pope")
     parser.add_argument("--gpu", default="0,1,2,3")
     parser.add_argument("--batch-size", type=int, default=16)
@@ -182,6 +184,7 @@ def run_inference(args: argparse.Namespace, out_dir: Path) -> Path:
         env["OMP_NUM_THREADS"] = env.get("OMP_NUM_THREADS", "1")
         env["PYTHONPATH"] = f"{LLAVA_CODE_ROOT}{os.pathsep}{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(LLAVA_CODE_ROOT)
         env.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
+        env["VISION_TOWER"] = str(args.vision_tower)
         cmd = base_cmd + ["--answers-file", str(merged_path)]
         subprocess.run(cmd, cwd=LLAVA_CODE_ROOT, env=env, check=True)
         return merged_path
@@ -204,6 +207,7 @@ def run_inference(args: argparse.Namespace, out_dir: Path) -> Path:
         env["OMP_NUM_THREADS"] = env.get("OMP_NUM_THREADS", "1")
         env["PYTHONPATH"] = f"{LLAVA_CODE_ROOT}{os.pathsep}{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(LLAVA_CODE_ROOT)
         env.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
+        env["VISION_TOWER"] = str(args.vision_tower)
         print(f"[run] POPE chunk={chunk_idx} gpu={gpu_id}", flush=True)
         procs.append(subprocess.Popen(cmd, cwd=LLAVA_CODE_ROOT, env=env))
         cmds.append(cmd)

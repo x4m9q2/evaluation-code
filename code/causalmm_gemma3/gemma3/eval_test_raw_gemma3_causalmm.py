@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument(
         "--question-file",
         type=str,
-        default=str(BUNDLE_ROOT / "outputs/beaf_causalmm/test_raw_llava.jsonl"),
+        default=str(BUNDLE_ROOT / "outputs/causalmm_gemma3/test_raw_llava.jsonl"),
     )
     parser.add_argument(
         "--answer-file",
@@ -39,7 +39,7 @@ def parse_args():
     parser.add_argument(
         "--output-file",
         type=str,
-        default=str(BUNDLE_ROOT / "outputs/beaf_causalmm/causalmm_gemma3_test_raw_results.json"),
+        default=str(BUNDLE_ROOT / "outputs/causalmm_gemma3/causalmm_gemma3_test_raw_results.json"),
     )
     parser.add_argument("--max-new-tokens", type=int, default=16)
     parser.add_argument("--gamma", type=float, default=1.0)

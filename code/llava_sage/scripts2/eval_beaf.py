@@ -16,6 +16,7 @@ BUNDLE_ROOT = LLAVA_CODE_ROOT.parents[1]
 DEFAULT_QNA_PATH = BUNDLE_ROOT / "data/beaf/beaf_qna.json"
 DEFAULT_IMAGE_FOLDER = BUNDLE_ROOT / "data/beaf/images"
 DEFAULT_OUTPUT_ROOT = BUNDLE_ROOT / "outputs/beaf"
+DEFAULT_VISION_TOWER = BUNDLE_ROOT / "models/clip-vit-large-patch14-336"
 
 
 def parse_args() -> argparse.Namespace:
@@ -35,6 +36,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("gpu", help="使用哪些 GPU，例如 0,1,2")
     parser.add_argument("--qna-path", type=Path, default=DEFAULT_QNA_PATH)
     parser.add_argument("--image-folder", type=Path, default=DEFAULT_IMAGE_FOLDER)
+    parser.add_argument("--vision-tower", type=Path, default=DEFAULT_VISION_TOWER)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--num-workers", type=int, default=4)
     parser.add_argument("--temperature", type=float, default=0.0)
@@ -349,6 +351,7 @@ def main() -> None:
         env["OMP_NUM_THREADS"] = env.get("OMP_NUM_THREADS", "1")
         env["PYTHONPATH"] = f"{LLAVA_CODE_ROOT}{os.pathsep}{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(LLAVA_CODE_ROOT)
         env.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
+        env["VISION_TOWER"] = str(args.vision_tower)
         cmd = base_cmd + ["--answers-file", str(predictions_file)]
         print(f"[run] {model_tag}", flush=True)
         subprocess.run(cmd, cwd=LLAVA_CODE_ROOT, env=env, check=True)
@@ -372,6 +375,7 @@ def main() -> None:
             env["OMP_NUM_THREADS"] = env.get("OMP_NUM_THREADS", "1")
             env["PYTHONPATH"] = f"{LLAVA_CODE_ROOT}{os.pathsep}{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(LLAVA_CODE_ROOT)
             env.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
+            env["VISION_TOWER"] = str(args.vision_tower)
             print(f"[run] {model_tag} chunk={chunk_idx} gpu={gpu_id}", flush=True)
             procs.append(subprocess.Popen(cmd, cwd=LLAVA_CODE_ROOT, env=env))
             cmds.append(cmd)

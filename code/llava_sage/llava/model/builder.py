@@ -105,6 +105,25 @@ def checkpoint_has_gate_weights(model_path):
     return False
 
 
+def _get_runtime_vision_tower_override():
+    vision_tower = os.environ.get("VISION_TOWER")
+    if not vision_tower:
+        return None
+    vision_tower = os.path.expanduser(vision_tower)
+    return vision_tower
+
+
+def _apply_runtime_vision_tower_override(config):
+    runtime_vision_tower = _get_runtime_vision_tower_override()
+    if runtime_vision_tower is None:
+        return config
+    if hasattr(config, "mm_vision_tower"):
+        config.mm_vision_tower = runtime_vision_tower
+    if hasattr(config, "vision_tower"):
+        config.vision_tower = runtime_vision_tower
+    return config
+
+
 def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto", device="cuda", use_flash_attn=False, **kwargs):
     force_use_dual_input_gate = kwargs.pop("force_use_dual_input_gate", None)
     requested_torch_dtype = kwargs.pop("torch_dtype", None)
@@ -189,11 +208,13 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
                     shutil.copyfile(os.path.join(model_base, 'configuration_mpt.py'), os.path.join(model_path, 'configuration_mpt.py'))
                 tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=True)
                 cfg_pretrained = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
+                cfg_pretrained = _apply_runtime_vision_tower_override(cfg_pretrained)
                 cfg_pretrained.use_dual_input_gate = use_dual_input_gate
                 model = LlavaMptForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=llava_low_cpu_mem_usage, config=cfg_pretrained, **kwargs)
             else:
                 tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=False)
                 cfg_pretrained = AutoConfig.from_pretrained(model_path)
+                cfg_pretrained = _apply_runtime_vision_tower_override(cfg_pretrained)
                 cfg_pretrained.use_dual_input_gate = use_dual_input_gate
                 model = LlavaLlamaForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=llava_low_cpu_mem_usage, config=cfg_pretrained, **kwargs)
 
@@ -203,19 +224,27 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         else:
             if 'mpt' in model_name.lower():
                 tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
-                model = LlavaMptForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=llava_low_cpu_mem_usage, **kwargs)
+                cfg_pretrained = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
+                cfg_pretrained = _apply_runtime_vision_tower_override(cfg_pretrained)
+                model = LlavaMptForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=llava_low_cpu_mem_usage, config=cfg_pretrained, **kwargs)
             elif 'mistral' in model_name.lower():
                 tokenizer = AutoTokenizer.from_pretrained(model_path)
+                cfg_pretrained = AutoConfig.from_pretrained(model_path)
+                cfg_pretrained = _apply_runtime_vision_tower_override(cfg_pretrained)
                 model = LlavaMistralForCausalLM.from_pretrained(
                     model_path,
                     low_cpu_mem_usage=llava_low_cpu_mem_usage,
+                    config=cfg_pretrained,
                     **kwargs
                 )
             else:
                 tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
+                cfg_pretrained = AutoConfig.from_pretrained(model_path)
+                cfg_pretrained = _apply_runtime_vision_tower_override(cfg_pretrained)
                 model = LlavaLlamaForCausalLM.from_pretrained(
                     model_path,
                     low_cpu_mem_usage=llava_low_cpu_mem_usage,
+                    config=cfg_pretrained,
                     **kwargs
                 )
     else:
@@ -248,6 +277,11 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         model.to(device=target_device, dtype=target_dtype)
 
     if is_llava_checkpoint:
+        runtime_vision_tower = _get_runtime_vision_tower_override()
+        if runtime_vision_tower is not None:
+            model.config.mm_vision_tower = runtime_vision_tower
+            if hasattr(model.config, "vision_tower"):
+                model.config.vision_tower = runtime_vision_tower
         model.config.use_dual_input_gate = use_dual_input_gate
         if hasattr(model, "get_model"):
             model.get_model().use_dual_input_gate = use_dual_input_gate
