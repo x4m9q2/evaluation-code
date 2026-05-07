@@ -32,6 +32,16 @@ def parse_args() -> argparse.Namespace:
         help="Generated train split used for supervised rows and Qwen keep/remove filtering.",
     )
     parser.add_argument(
+        "--stage2-input-json",
+        type=Path,
+        default=DEFAULT_BUNDLE_ROOT / "data/shortcut_pipeline/cross_modality_qa_input.json",
+        help=(
+            "Optional full stage-2 candidate JSON used to backfill generated-train rows "
+            "when --generated-train points to a split train.json that does not cover all "
+            "keep/remove question ids."
+        ),
+    )
+    parser.add_argument(
         "--keep-json",
         type=Path,
         default=DEFAULT_BUNDLE_ROOT
@@ -122,6 +132,14 @@ def normalize_train_row(row: dict[str, Any]) -> dict[str, Any]:
         "answer": str(row["answer"]).strip(),
         "answer_type": row.get("answer_type", "other"),
     }
+
+
+def load_stage2_input_rows(path: Path) -> list[dict[str, Any]]:
+    payload = load_json(path)
+    rows = payload.get("results", []) if isinstance(payload, dict) else payload
+    if not isinstance(rows, list):
+        raise ValueError(f"Expected a list or a dict with 'results' in stage2 input: {path}")
+    return [normalize_train_row(x) for x in rows]
 
 
 def load_mask(mask_path: Path) -> np.ndarray:
@@ -322,7 +340,20 @@ def main() -> None:
     train_qids = set(train_by_qid)
     missing_train_qids = (keep_qid_set | remove_qid_set) - train_qids
     if missing_train_qids:
-        raise ValueError(f"Missing question ids in generated_train: {sorted(missing_train_qids)[:20]}")
+        if args.stage2_input_json.exists():
+            stage2_input_rows = load_stage2_input_rows(args.stage2_input_json)
+            stage2_by_qid = {int(x["question_id"]): x for x in stage2_input_rows}
+            for qid in sorted(missing_train_qids):
+                row = stage2_by_qid.get(qid)
+                if row is not None:
+                    train_by_qid[qid] = row
+            train_qids = set(train_by_qid)
+            missing_train_qids = (keep_qid_set | remove_qid_set) - train_qids
+        if missing_train_qids:
+            raise ValueError(
+                "Missing question ids in generated_train even after stage2-input backfill: "
+                f"{sorted(missing_train_qids)[:20]}"
+            )
 
     if args.limit_keep is None and args.limit_remove is None and (keep_qid_set | remove_qid_set) != train_qids:
         missing = sorted(train_qids - (keep_qid_set | remove_qid_set))[:20]

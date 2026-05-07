@@ -61,6 +61,7 @@ case "${TASK}" in
     ;;
   vqa-build)
     VQA_GENERATED_TRAIN_JSON="${VQA_GENERATED_TRAIN_JSON:-${BUNDLE_ROOT}/data/shortcut_pipeline/vqa_v2_cmsv/train.json}"
+    VQA_STAGE2_INPUT_JSON="${VQA_STAGE2_INPUT_JSON:-${BUNDLE_ROOT}/data/shortcut_pipeline/cross_modality_qa_input.json}"
     VQA_KEEP_JSON="${VQA_KEEP_JSON:-${BUNDLE_ROOT}/analysis/visual_cue_question_filter_qwen35_strict4/full_all_shards/merged/keep.json}"
     VQA_REMOVE_JSON="${VQA_REMOVE_JSON:-${BUNDLE_ROOT}/analysis/visual_cue_question_filter_qwen35_strict4/full_all_shards/merged/remove.json}"
     VQA_ORIGINAL_SPLIT_TRAIN="${VQA_ORIGINAL_SPLIT_TRAIN:-${BUNDLE_ROOT}/data/shortcut_pipeline/vqa_v2_cmsv/train.json}"
@@ -77,6 +78,7 @@ case "${TASK}" in
     VQA_OUTPUT_NPZ="${VQA_OUTPUT_NPZ:-${BUNDLE_ROOT}/data/stage2/patch_mask_analysis_train_raw_qwenkeep_sam3_nonumbermask_compat.npz}"
     VQA_SUMMARY_JSON="${VQA_SUMMARY_JSON:-${BUNDLE_ROOT}/data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa_nonumbermask.summary.json}"
     check_path "${VQA_GENERATED_TRAIN_JSON}" "VQA generated-train JSON"
+    check_path "${VQA_STAGE2_INPUT_JSON}" "VQA stage-2 input JSON"
     check_path "${VQA_KEEP_JSON}" "Qwen keep JSON"
     check_path "${VQA_REMOVE_JSON}" "Qwen remove JSON"
     check_path "${VQA_ORIGINAL_SPLIT_TRAIN}" "VQA original-source train split"
@@ -85,6 +87,7 @@ case "${TASK}" in
     check_path "${VQA_MASK_DIR}" "VQA SAM3 mask directory"
     run_or_echo "${PYTHON_BIN}" "${BUNDLE_ROOT}/code/llava_sage/scripts2/build_qwenkeep_stage2_package.py" \
       --generated-train "${VQA_GENERATED_TRAIN_JSON}" \
+      --stage2-input-json "${VQA_STAGE2_INPUT_JSON}" \
       --keep-json "${VQA_KEEP_JSON}" \
       --remove-json "${VQA_REMOVE_JSON}" \
       --original-split "${VQA_ORIGINAL_SPLIT_TRAIN}" \
