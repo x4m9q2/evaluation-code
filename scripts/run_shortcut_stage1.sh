@@ -9,6 +9,7 @@ SHORTCUT_CODE_DIR="${SHORTCUT_CODE_DIR:-${BUNDLE_ROOT}/code/shortcut_pipeline}"
 SHORTCUT_PIPELINE_DIR="${SHORTCUT_PIPELINE_DIR:-${BUNDLE_ROOT}/data/shortcut_pipeline}"
 SHORTCUT_GMINER="${SHORTCUT_GMINER:-${SHORTCUT_CODE_DIR}/bin/GMiner}"
 SHORTCUT_MATCHER_BIN="${SHORTCUT_MATCHER_BIN:-${SHORTCUT_CODE_DIR}/bin/cuda}"
+SAM3_BPE_PATH="${SAM3_BPE_PATH:-${BUNDLE_ROOT}/code/sam3/sam3/assets/bpe_simple_vocab_16e6.txt.gz}"
 SAM3_DEVICE="${SAM3_DEVICE:-cuda}"
 SAM3_BATCH_SIZE="${SAM3_BATCH_SIZE:-32}"
 SAM3_RESOLUTION="${SAM3_RESOLUTION:-1008}"
@@ -25,6 +26,17 @@ MATCHER_GPUS="${MATCHER_GPUS:-${CUDA_VISIBLE_DEVICES}}"
 MATCHER_BATCH_SIZE="${MATCHER_BATCH_SIZE:-262144}"
 STAGE1_LIMIT="${STAGE1_LIMIT:-0}"
 STAGE2_LIMIT="${STAGE2_LIMIT:--1}"
+
+INSTANCES_JSON="$(resolve_bundle_path "${INSTANCES_JSON}")"
+VQA_QUESTIONS_JSON="$(resolve_bundle_path "${VQA_QUESTIONS_JSON}")"
+VQA_ANNOTATIONS_JSON="$(resolve_bundle_path "${VQA_ANNOTATIONS_JSON}")"
+SHORTCUT_CODE_DIR="$(resolve_bundle_path "${SHORTCUT_CODE_DIR}")"
+SHORTCUT_PIPELINE_DIR="$(resolve_bundle_path "${SHORTCUT_PIPELINE_DIR}")"
+SHORTCUT_GMINER="$(resolve_bundle_path "${SHORTCUT_GMINER}")"
+SHORTCUT_MATCHER_BIN="$(resolve_bundle_path "${SHORTCUT_MATCHER_BIN}")"
+SAM3_BPE_PATH="$(resolve_bundle_path "${SAM3_BPE_PATH}")"
+VQA_TRAIN2014_IMAGE_ROOT="$(resolve_bundle_path "${VQA_TRAIN2014_IMAGE_ROOT}")"
+SAM3_CHECKPOINT="$(resolve_bundle_path "${SAM3_CHECKPOINT}")"
 
 echo "Stage 1 shortcut pipeline"
 echo "Output root: ${SHORTCUT_PIPELINE_DIR}"
@@ -181,6 +193,14 @@ STAGE2_MAPPING_JSON="${STAGE2_MAPPING_JSON:-${SHORTCUT_PIPELINE_DIR}/cross_modal
 STAGE2_UNION_MASK_ROOT="${STAGE2_UNION_MASK_ROOT:-${SHORTCUT_PIPELINE_DIR}/union_mask}"
 STAGE2_MASK_ROOT="${STAGE2_MASK_ROOT:-${SHORTCUT_PIPELINE_DIR}/output_mask}"
 
+STAGE2_MERGED_JSON="$(resolve_bundle_path "${STAGE2_MERGED_JSON}")"
+STAGE2_QUESTIONS_JSON="$(resolve_bundle_path "${STAGE2_QUESTIONS_JSON}")"
+STAGE2_INPUT_JSON="$(resolve_bundle_path "${STAGE2_INPUT_JSON}")"
+STAGE2_QA_JSONL="$(resolve_bundle_path "${STAGE2_QA_JSONL}")"
+STAGE2_MAPPING_JSON="$(resolve_bundle_path "${STAGE2_MAPPING_JSON}")"
+STAGE2_UNION_MASK_ROOT="$(resolve_bundle_path "${STAGE2_UNION_MASK_ROOT}")"
+STAGE2_MASK_ROOT="$(resolve_bundle_path "${STAGE2_MASK_ROOT}")"
+
 echo
 echo "Stage 1 post-step: prepare stage-2 masks"
 echo "Merged: ${STAGE2_MERGED_JSON}"
@@ -193,6 +213,7 @@ echo "Masks:  ${STAGE2_MASK_ROOT}"
 echo
 
 check_path "${VQA_TRAIN2014_IMAGE_ROOT}" "COCO train2014 image root"
+check_path "${SAM3_BPE_PATH}" "SAM3 tokenizer BPE"
 
 STAGE2_PREPARE_CMD=(
   "${PYTHON_BIN}" "${SHORTCUT_CODE_DIR}/prepare_stage2_inputs.py"

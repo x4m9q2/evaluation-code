@@ -17,6 +17,13 @@ MASK_ROOT="${MASK_ROOT:-${SHORTCUT_PIPELINE_DIR}/output_mask}"
 OUTPUT_JSONL="${OUTPUT_JSONL:-${SHORTCUT_PIPELINE_DIR}/batch_inputs/cross_modality_qa_requests.jsonl}"
 BATCH_OUTPUT_JSONL="${BATCH_OUTPUT_JSONL:-${SHORTCUT_PIPELINE_DIR}/batch_outputs/cross_modality_qa_responses.jsonl}"
 
+SHORTCUT_CODE_DIR="$(resolve_bundle_path "${SHORTCUT_CODE_DIR}")"
+SHORTCUT_PIPELINE_DIR="$(resolve_bundle_path "${SHORTCUT_PIPELINE_DIR}")"
+INPUT_JSON="$(resolve_bundle_path "${INPUT_JSON}")"
+MASK_ROOT="$(resolve_bundle_path "${MASK_ROOT}")"
+OUTPUT_JSONL="$(resolve_bundle_path "${OUTPUT_JSONL}")"
+BATCH_OUTPUT_JSONL="$(resolve_bundle_path "${BATCH_OUTPUT_JSONL}")"
+
 echo "Stage 2 shortcut request generation"
 echo "Input:  ${INPUT_JSON}"
 echo "Masks:  ${MASK_ROOT}"

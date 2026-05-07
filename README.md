@@ -67,6 +67,8 @@ VQA-CMSV generation requires:
   `code/shortcut_pipeline/bin/GMiner`
 - CUDA matcher for shortcut matching:
   `code/shortcut_pipeline/bin/cuda`
+- SAM3 tokenizer asset used by the stage-1 post-step mask generation:
+  `code/sam3/sam3/assets/bpe_simple_vocab_16e6.txt.gz`
 
 Official download entry points:
 
@@ -100,6 +102,13 @@ Shortcut-mining binaries and their provenance:
   `https://github.com/cdancette/detect-shortcuts`
 - `code/shortcut_pipeline/bin/cuda` is the local CUDA matcher binary used in
   this project for shortcut-rule matching
+- `code/sam3/sam3/assets/bpe_simple_vocab_16e6.txt.gz` is expected by the
+  bundled SAM3 code during text-conditioned mask generation
+- The SAM3 codebase itself comes from Meta's official repository:
+  `https://github.com/facebookresearch/sam3`
+- The SAM3 checkpoint used by this repo is downloaded from Meta's Hugging Face
+  release:
+  `https://huggingface.co/facebook/sam3`
 - The CUDA matcher source is bundled under
   `code/shortcut_pipeline/find_shortcut/`
 - The main CUDA source file is
@@ -153,6 +162,10 @@ prefix after stage-1 mining finishes. Concretely, it performs:
 - SAM3 runtime preflight
 - `generate_union_masks_from_mapping.py`
 - `apply_union_masks_to_images.py`
+
+That means the wrapper also needs the SAM3 tokenizer asset at
+`code/sam3/sam3/assets/bpe_simple_vocab_16e6.txt.gz`. This file is not
+downloaded automatically by the wrapper.
 
 There is no longer a separate optional switch for skipping this prefix in the
 default wrapper behavior.

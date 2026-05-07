@@ -110,6 +110,19 @@ run_or_echo() {
   "$@"
 }
 
+resolve_bundle_path() {
+  local path="${1:-}"
+  if [[ -z "${path}" ]]; then
+    printf '%s\n' ""
+    return 0
+  fi
+  if [[ "${path}" == /* ]]; then
+    printf '%s\n' "${path}"
+    return 0
+  fi
+  printf '%s\n' "${BUNDLE_ROOT}/${path#./}"
+}
+
 check_path() {
   local path="$1"
   local label="$2"
