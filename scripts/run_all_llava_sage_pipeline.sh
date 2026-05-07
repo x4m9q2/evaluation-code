@@ -3,7 +3,7 @@ set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common_llava.sh"
 
 echo "Pipeline mode: ${PIPELINE_MODE:-check}"
-echo "By default this is a dry run. Set DRY_RUN=0 to execute commands."
+echo "All steps execute by default. Override paths and training parameters with environment variables."
 echo
 
 bash "${BUNDLE_ROOT}/scripts/run_build_pretrain_json.sh"

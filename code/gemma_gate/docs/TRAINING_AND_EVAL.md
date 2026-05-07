@@ -58,7 +58,9 @@ pip install -r requirements-py310.txt
 pip install flash-attn --no-build-isolation
 ```
 
-If FlashAttention2 is unstable, set `DISABLE_FLASH_ATTN2=True` in the run scripts. Gemma3 emits a warning recommending eager attention, but the local 5-step smoke test completed successfully with FlashAttention2.
+If FlashAttention2 is unstable, set `DISABLE_FLASH_ATTN2=True` in the run scripts.
+Gemma3 may emit a warning recommending eager attention; use the attention backend
+that is stable in your environment.
 
 ## 3. Pretraining: Gate + Projector + L1
 
@@ -193,18 +195,12 @@ for traceability and may still use upstream absolute paths or
 Shortcut stage-2 outputs can be converted into the LLaVA NaPO HF dataset with:
 
 ```bash
-RUN=1 PYTHON_BIN=$PWD/.venv_gemma/bin/python \
+PYTHON_BIN=$PWD/.venv_gemma/bin/python \
   bash scripts/run_build_shortcut_napo_splits.sh
 
-RUN=1 PYTHON_BIN=$PWD/.venv_gemma/bin/python \
+PYTHON_BIN=$PWD/.venv_gemma/bin/python \
   bash scripts/run_build_shortcut_napo_llava_dataset.sh
 ```
-
-Validated LLaVA NaPO smoke:
-
-- `max_steps=1`
-- `global_step=1`
-- checkpoint written under `/tmp/napo_llava_shortcut_generated_smoke/checkpoints/checkpoint-1`
 
 ## 8. Current Example Runs
 

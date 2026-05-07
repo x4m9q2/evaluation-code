@@ -31,10 +31,6 @@ echo "Stage 1 shortcut pipeline"
 echo "Output root: ${SHORTCUT_PIPELINE_DIR}"
 echo
 
-should_run() {
-  [[ "${DRY_RUN:-1}" == "0" || "${RUN:-0}" == "1" ]]
-}
-
 run_mask_shards() {
   local mask_script="$1"
   local qa_jsonl="$2"
@@ -103,18 +99,10 @@ run_mask_shards() {
       --shard-index "${shard}"
     )
 
-    if should_run; then
-      echo "[run/bg][shard ${shard}] ${shard_cmd[*]}"
-      "${shard_cmd[@]}" &
-      pids+=("$!")
-    else
-      echo "[dry-run/bg][shard ${shard}] ${shard_cmd[*]}"
-    fi
+    echo "[run/bg][shard ${shard}] ${shard_cmd[*]}"
+    "${shard_cmd[@]}" &
+    pids+=("$!")
   done
-
-  if ! should_run; then
-    return
-  fi
 
   local failed=0
   for ((shard = 0; shard < ${#pids[@]}; shard++)); do

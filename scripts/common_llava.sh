@@ -100,20 +100,14 @@ has_glob_matches() {
 if [[ -z "${LLAVA_EVAL_MODEL:-}" ]]; then
   if [[ -d "${BUNDLE_ROOT}/checkpoints/llava_stage2_sage" ]]; then
     export LLAVA_EVAL_MODEL="${BUNDLE_ROOT}/checkpoints/llava_stage2_sage"
-  elif [[ -d "${BUNDLE_ROOT}/checkpoints/llava_pretrain_gate_smoke50_assembled" ]]; then
-    export LLAVA_EVAL_MODEL="${BUNDLE_ROOT}/checkpoints/llava_pretrain_gate_smoke50_assembled"
   else
     export LLAVA_EVAL_MODEL="${LLAVA_BASE_MODEL}"
   fi
 fi
 
 run_or_echo() {
-  if [[ "${DRY_RUN:-1}" == "0" || "${RUN:-0}" == "1" ]]; then
-    echo "[run] $*"
-    "$@"
-  else
-    echo "[dry-run] $*"
-  fi
+  echo "[run] $*"
+  "$@"
 }
 
 check_path() {
@@ -121,10 +115,7 @@ check_path() {
   local label="$2"
   if [[ ! -e "${path}" ]]; then
     echo "[missing] ${label}: ${path}" >&2
-    if [[ "${DRY_RUN:-1}" == "0" || "${RUN:-0}" == "1" ]]; then
-      return 1
-    fi
-    return 0
+    return 1
   fi
   echo "[ok] ${label}: ${path}"
 }

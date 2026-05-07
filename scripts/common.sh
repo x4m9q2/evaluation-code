@@ -63,12 +63,8 @@ export NAPO_DATA="${NAPO_DATA:-${BUNDLE_ROOT}/data/napo/train_raw_pos_neg_shortc
 mkdir -p "${BUNDLE_ROOT}/logs" "${BUNDLE_ROOT}/outputs" "${BUNDLE_ROOT}/checkpoints"
 
 run_or_echo() {
-  if [[ "${DRY_RUN:-1}" == "0" || "${RUN:-0}" == "1" ]]; then
-    echo "[run] $*"
-    "$@"
-  else
-    echo "[dry-run] $*"
-  fi
+  echo "[run] $*"
+  "$@"
 }
 
 check_path() {
@@ -76,10 +72,7 @@ check_path() {
   local label="$2"
   if [[ ! -e "${path}" ]]; then
     echo "[missing] ${label}: ${path}" >&2
-    if [[ "${DRY_RUN:-1}" == "0" || "${RUN:-0}" == "1" ]]; then
-      return 1
-    fi
-    return 0
+    return 1
   fi
   echo "[ok] ${label}: ${path}"
 }

@@ -43,13 +43,13 @@
 阶段 1 一键运行：
 
 ```bash
-RUN=1 bash scripts/run_shortcut_stage1.sh
+bash scripts/run_shortcut_stage1.sh
 ```
 
-如果只想抽样验证，直接限制样本数：
+如果需要限制样本数，直接设置环境变量：
 
 ```bash
-RUN=1 STAGE1_LIMIT=384 bash scripts/run_shortcut_stage1.sh
+STAGE1_LIMIT=384 bash scripts/run_shortcut_stage1.sh
 ```
 
 当 `PREPARE_STAGE2_MASKS=1` 时，阶段 1 会继续生成阶段 2 所需输入和 mask。
@@ -103,19 +103,14 @@ RUN=1 STAGE1_LIMIT=384 bash scripts/run_shortcut_stage1.sh
 阶段 2 一键运行：
 
 ```bash
-RUN=1 bash scripts/run_shortcut_stage2.sh
+bash scripts/run_shortcut_stage2.sh
 ```
 
-抽样验证：
+限制生成数量：
 
 ```bash
-RUN=1 STAGE2_LIMIT=28 bash scripts/run_shortcut_stage2.sh
+STAGE2_LIMIT=28 bash scripts/run_shortcut_stage2.sh
 ```
-
-## 与旧 smoke 逻辑的关系
-
-不再保留单独的 smoke 开关、smoke 路径或 smoke 包装脚本。
-小样本运行统一通过环境变量或命令行参数限制数量完成。
 
 ## 补充说明
 
