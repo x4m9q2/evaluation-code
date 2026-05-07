@@ -21,6 +21,12 @@ EXTRA_ARGS="${EXTRA_ARGS:-}"
 
 mkdir -p "${OUTPUT_DIR}" "$(dirname "${LOG_FILE}")"
 
+check_path "${BASE_MODEL_ID}" "Gemma base model"
+check_path "${GATE_TEXT_MODEL_ID}" "gate text encoder"
+check_path "${DEEPSPEED_CONFIG}" "DeepSpeed config"
+check_path "${PRETRAIN_DATA}" "pretraining JSON"
+check_path "${PRETRAIN_IMAGE_FOLDER}" "pretraining image folder"
+
 {
   echo "[run] ${RUN_NAME}"
   echo "[model] ${BASE_MODEL_ID}"
