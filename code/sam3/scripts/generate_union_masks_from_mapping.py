@@ -55,7 +55,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--resolution", type=int, default=1008)
     parser.add_argument("--score-thresh", type=float, default=0.5)
-    parser.add_argument("--checkpoint-path", type=str, default="sam3_ckpt/sam3.pt")
+    parser.add_argument("--checkpoint-path", type=str, default=None)
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--no-load-from-hf", action="store_true")
     parser.add_argument("--limit", type=int, default=-1)

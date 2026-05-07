@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
 import time
 from pathlib import Path
@@ -18,8 +17,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 PIPE_ROOT = REPO_ROOT / "data" / "shortcut_pipeline"
 DEFAULT_INPUT = PIPE_ROOT / "batch_inputs" / "cross_modality_qa_requests.jsonl"
 DEFAULT_OUTPUT = PIPE_ROOT / "batch_outputs" / "cross_modality_qa_responses.jsonl"
-DEFAULT_CODEX_CONFIG = Path(".codex/config.toml")
-DEFAULT_CODEX_AUTH = Path(".codex/auth.json")
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,34 +25,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-jsonl", default=str(DEFAULT_OUTPUT))
     parser.add_argument("--base-url", default=os.environ.get("OPENAI_BASE_URL", ""))
     parser.add_argument("--api-key", default=os.environ.get("OPENAI_API_KEY", ""))
-    parser.add_argument("--model", default="")
+    parser.add_argument("--model", default=os.environ.get("MODEL", ""))
     parser.add_argument("--limit", type=int, default=-1, help="<= 0 keeps all rows.")
     parser.add_argument("--sleep-seconds", type=float, default=0.0)
     parser.add_argument("--timeout", type=int, default=300)
-    parser.add_argument("--codex-config", default=str(DEFAULT_CODEX_CONFIG))
-    parser.add_argument("--codex-auth", default=str(DEFAULT_CODEX_AUTH))
     return parser.parse_args()
-
-
-def read_text_if_exists(path: Path) -> str:
-    return path.read_text(encoding="utf-8") if path.exists() else ""
-
-
-def infer_codex_base_url(config_text: str) -> str:
-    match = re.search(r'base_url\s*=\s*"([^"]+)"', config_text)
-    return match.group(1).rstrip("/") if match else ""
-
-
-def infer_codex_model(config_text: str) -> str:
-    match = re.search(r'^model\s*=\s*"([^"]+)"', config_text, re.MULTILINE)
-    return match.group(1) if match else ""
-
-
-def infer_codex_api_key(auth_path: Path) -> str:
-    if not auth_path.exists():
-        return ""
-    payload = json.loads(auth_path.read_text(encoding="utf-8"))
-    return str(payload.get("OPENAI_API_KEY", "")).strip()
 
 
 def iter_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -109,23 +83,20 @@ def main() -> None:
     args = parse_args()
     input_path = Path(args.input_jsonl).resolve()
     output_path = Path(args.output_jsonl).resolve()
-    config_path = Path(args.codex_config).resolve()
-    auth_path = Path(args.codex_auth).resolve()
 
     if not input_path.exists():
         raise FileNotFoundError(f"Input JSONL not found: {input_path}")
 
-    config_text = read_text_if_exists(config_path)
-    base_url = args.base_url.strip() or infer_codex_base_url(config_text)
-    api_key = args.api_key.strip() or infer_codex_api_key(auth_path)
-    model = args.model.strip() or infer_codex_model(config_text)
+    base_url = args.base_url.strip()
+    api_key = args.api_key.strip()
+    model = args.model.strip()
 
     if not base_url:
-        raise RuntimeError("No base URL found. Pass --base-url or configure .codex/config.toml.")
+        raise RuntimeError("No base URL found. Pass --base-url or set OPENAI_BASE_URL.")
     if not api_key:
-        raise RuntimeError("No API key found. Pass --api-key or configure .codex/auth.json.")
+        raise RuntimeError("No API key found. Pass --api-key or set OPENAI_API_KEY.")
     if not model:
-        raise RuntimeError("No model found. Pass --model or configure .codex/config.toml.")
+        raise RuntimeError("No model found. Pass --model or set MODEL.")
 
     rows = iter_jsonl(input_path)
     if args.limit > 0:

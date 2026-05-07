@@ -78,6 +78,51 @@ http://images.cocodataset.org/zips/train2014.zip
 https://visualqa.org/download.html
 ```
 
+File placement details:
+
+- `annotations/instances_train2014.json` must be copied from
+  `annotations_trainval2014.zip`, specifically the file
+  `annotations/instances_train2014.json`, into `annotations/`.
+- VQAv2 train questions must use the original filename
+  `v2_OpenEnded_mscoco_train2014_questions.json` and be placed at
+  `data/detect-shortcuts/data/vqa2/`.
+- VQAv2 train annotations must use the original filename
+  `v2_mscoco_train2014_annotations.json` and be placed at
+  `data/detect-shortcuts/data/vqa2/`.
+- COCO train2014 images must be extracted so that files like
+  `COCO_train2014_000000000009.jpg` are directly under
+  `data/images/coco/train2014/`.
+- If you also evaluate LLaVA or Gemma later, `data/images/` is expected to
+  contain at least `coco/train2014/`, `gqa/images/`, and `vg/` when those
+  datasets are used.
+
+Shortcut-mining binaries and their provenance:
+
+- `code/shortcut_pipeline/bin/GMiner` comes from the detect-shortcuts project:
+  `https://github.com/cdancette/detect-shortcuts`
+- `code/shortcut_pipeline/bin/cuda` is the local CUDA matcher binary used in
+  this project for shortcut-rule matching
+- The CUDA matcher source is bundled under
+  `code/shortcut_pipeline/find_shortcut/`
+- The main CUDA source file is
+  `code/shortcut_pipeline/find_shortcut/test.cu`
+- The CMake build file is
+  `code/shortcut_pipeline/find_shortcut/CMakeLists.txt`
+- The compiled binary is not tracked in Git; build it locally before running
+  stage 1
+- Rebuild the matcher from the repository root with:
+
+```bash
+bash scripts/build_shortcut_matcher.sh
+```
+
+- This writes the compiled binary to `code/shortcut_pipeline/bin/cuda`
+- Build prerequisites:
+  - CUDA toolkit compatible with your driver
+  - `cmake >= 3.18`
+  - `gcc-12` and `g++-12` if available on the machine
+  - Jansson development headers and library, e.g. `libjansson-dev`
+
 The released benchmark can be downloaded from Hugging Face:
 
 ```text
@@ -103,10 +148,32 @@ Stage 1: mine textual shortcut rules and candidate matches.
 bash scripts/run_shortcut_stage1.sh
 ```
 
+`run_shortcut_stage1.sh` now always continues into the stage-2 mask-preparation
+prefix after stage-1 mining finishes. Concretely, it performs:
+
+- `prepare_stage2_inputs.py`
+- SAM3 runtime preflight
+- `generate_union_masks_from_mapping.py`
+- `apply_union_masks_to_images.py`
+
+There is no longer a separate optional switch for skipping this prefix in the
+default wrapper behavior.
+
 Stage 2: generate CMSV samples from the stage-1 results.
 
 ```bash
 bash scripts/run_shortcut_stage2.sh
+```
+
+If you want to submit stage-2 requests to an API, pass the API settings
+explicitly. The wrapper and `submit_batch_requests.py` no longer read Codex or
+editor-local config files automatically. Provide:
+
+```bash
+OPENAI_BASE_URL=...
+OPENAI_API_KEY=...
+MODEL=...
+SUBMIT_API=1 bash scripts/run_shortcut_stage2.sh
 ```
 
 Convert generation outputs into released VQA v2-CMSV splits:

@@ -9,7 +9,6 @@ SHORTCUT_CODE_DIR="${SHORTCUT_CODE_DIR:-${BUNDLE_ROOT}/code/shortcut_pipeline}"
 SHORTCUT_PIPELINE_DIR="${SHORTCUT_PIPELINE_DIR:-${BUNDLE_ROOT}/data/shortcut_pipeline}"
 SHORTCUT_GMINER="${SHORTCUT_GMINER:-${SHORTCUT_CODE_DIR}/bin/GMiner}"
 SHORTCUT_MATCHER_BIN="${SHORTCUT_MATCHER_BIN:-${SHORTCUT_CODE_DIR}/bin/cuda}"
-PREPARE_STAGE2_MASKS="${PREPARE_STAGE2_MASKS:-1}"
 SAM3_DEVICE="${SAM3_DEVICE:-cuda}"
 SAM3_BATCH_SIZE="${SAM3_BATCH_SIZE:-32}"
 SAM3_RESOLUTION="${SAM3_RESOLUTION:-1008}"
@@ -38,6 +37,8 @@ run_mask_shards() {
   local union_mask_root="$4"
   local image_root="$5"
   local checkpoint_path="$6"
+  shift 6
+  local -a checkpoint_args=("$@")
 
   if [[ "${STAGE2_NUM_SHARDS}" -le 1 ]]; then
     local -a single_cmd=(
@@ -49,12 +50,13 @@ run_mask_shards() {
       --batch-size "${SAM3_BATCH_SIZE}"
       --resolution "${SAM3_RESOLUTION}"
       --score-thresh "${SAM3_SCORE_THRESH}"
-      --checkpoint-path "${checkpoint_path}"
       --device "${SAM3_DEVICE}"
-      --no-load-from-hf
       --num-shards 1
       --shard-index "${STAGE2_SHARD_INDEX}"
     )
+    if [[ "${#checkpoint_args[@]}" -gt 0 ]]; then
+      single_cmd+=("${checkpoint_args[@]}")
+    fi
     run_or_echo "${single_cmd[@]}"
     return
   fi
@@ -92,12 +94,13 @@ run_mask_shards() {
       --batch-size "${SAM3_BATCH_SIZE}"
       --resolution "${SAM3_RESOLUTION}"
       --score-thresh "${SAM3_SCORE_THRESH}"
-      --checkpoint-path "${checkpoint_path}"
       --device cuda
-      --no-load-from-hf
       --num-shards "${STAGE2_NUM_SHARDS}"
       --shard-index "${shard}"
     )
+    if [[ "${#checkpoint_args[@]}" -gt 0 ]]; then
+      shard_cmd+=("${checkpoint_args[@]}")
+    fi
 
     echo "[run/bg][shard ${shard}] ${shard_cmd[*]}"
     "${shard_cmd[@]}" &
@@ -123,6 +126,17 @@ check_sam3_runtime() {
     "import ftfy, iopath, pycocotools, timm; from sam3 import build_sam3_image_model"
   )
   run_or_echo "${check_cmd[@]}"
+}
+
+sam3_ckpt_args() {
+  local checkpoint_path="$1"
+  local -n out_args_ref="$2"
+  out_args_ref=()
+  if [[ -n "${checkpoint_path}" && -f "${checkpoint_path}" ]]; then
+    out_args_ref+=(--checkpoint-path "${checkpoint_path}" --no-load-from-hf)
+  else
+    echo "[warn] SAM3 checkpoint not found at ${checkpoint_path}; falling back to Hugging Face download" >&2
+  fi
 }
 
 check_path "${INSTANCES_JSON}" "COCO instances_train2014"
@@ -153,63 +167,64 @@ fi
 
 run_or_echo "${CMD[@]}"
 
-if [[ "${PREPARE_STAGE2_MASKS}" == "1" ]]; then
-  STAGE2_MERGED_JSON="${STAGE2_MERGED_JSON:-${SHORTCUT_PIPELINE_DIR}/gqa_merged_output_with_answer_type.json}"
-  if [[ -z "${STAGE2_QUESTIONS_JSON:-}" ]]; then
-    if [[ "${STAGE1_LIMIT}" -gt 0 ]]; then
-      STAGE2_QUESTIONS_JSON="${SHORTCUT_PIPELINE_DIR}/train_questions.json"
-    else
-      STAGE2_QUESTIONS_JSON="${VQA_QUESTIONS_JSON}"
-    fi
+STAGE2_MERGED_JSON="${STAGE2_MERGED_JSON:-${SHORTCUT_PIPELINE_DIR}/gqa_merged_output_with_answer_type.json}"
+if [[ -z "${STAGE2_QUESTIONS_JSON:-}" ]]; then
+  if [[ "${STAGE1_LIMIT}" -gt 0 ]]; then
+    STAGE2_QUESTIONS_JSON="${SHORTCUT_PIPELINE_DIR}/train_questions.json"
+  else
+    STAGE2_QUESTIONS_JSON="${VQA_QUESTIONS_JSON}"
   fi
-  STAGE2_INPUT_JSON="${STAGE2_INPUT_JSON:-${SHORTCUT_PIPELINE_DIR}/cross_modality_qa_input.json}"
-  STAGE2_QA_JSONL="${STAGE2_QA_JSONL:-${SHORTCUT_PIPELINE_DIR}/cross_modality_qa_questions.jsonl}"
-  STAGE2_MAPPING_JSON="${STAGE2_MAPPING_JSON:-${SHORTCUT_PIPELINE_DIR}/cross_modality_qa_mapping.json}"
-  STAGE2_UNION_MASK_ROOT="${STAGE2_UNION_MASK_ROOT:-${SHORTCUT_PIPELINE_DIR}/union_mask}"
-  STAGE2_MASK_ROOT="${STAGE2_MASK_ROOT:-${SHORTCUT_PIPELINE_DIR}/output_mask}"
-
-  echo
-  echo "Stage 1 post-step: prepare stage-2 masks"
-  echo "Merged: ${STAGE2_MERGED_JSON}"
-  echo "Ques:   ${STAGE2_QUESTIONS_JSON}"
-  echo "Input:  ${STAGE2_INPUT_JSON}"
-  echo "QA:     ${STAGE2_QA_JSONL}"
-  echo "Map:    ${STAGE2_MAPPING_JSON}"
-  echo "Union:  ${STAGE2_UNION_MASK_ROOT}"
-  echo "Masks:  ${STAGE2_MASK_ROOT}"
-  echo
-
-  check_path "${SAM3_CHECKPOINT}" "SAM3 checkpoint"
-  check_path "${VQA_TRAIN2014_IMAGE_ROOT}" "COCO train2014 image root"
-
-  STAGE2_PREPARE_CMD=(
-    "${PYTHON_BIN}" "${SHORTCUT_CODE_DIR}/prepare_stage2_inputs.py"
-    --merged-json "${STAGE2_MERGED_JSON}"
-    --questions-json "${STAGE2_QUESTIONS_JSON}"
-    --output-json "${STAGE2_INPUT_JSON}"
-    --qa-jsonl "${STAGE2_QA_JSONL}"
-    --mapping-json "${STAGE2_MAPPING_JSON}"
-    --limit "${STAGE2_LIMIT}"
-  )
-  run_or_echo "${STAGE2_PREPARE_CMD[@]}"
-
-  echo "Stage 2 preflight: verify SAM3 runtime imports"
-  check_sam3_runtime
-
-  run_mask_shards \
-    "${BUNDLE_ROOT}/code/sam3/scripts/generate_union_masks_from_mapping.py" \
-    "${STAGE2_QA_JSONL}" \
-    "${STAGE2_MAPPING_JSON}" \
-    "${STAGE2_UNION_MASK_ROOT}" \
-    "${VQA_TRAIN2014_IMAGE_ROOT}" \
-    "${SAM3_CHECKPOINT}"
-
-  STAGE2_APPLY_CMD=(
-    "${PYTHON_BIN}" "${SHORTCUT_CODE_DIR}/apply_union_masks_to_images.py"
-    --qa-jsonl "${STAGE2_QA_JSONL}"
-    --mask-dir "${STAGE2_UNION_MASK_ROOT}/masks"
-    --image-root "${VQA_TRAIN2014_IMAGE_ROOT}"
-    --output-dir "${STAGE2_MASK_ROOT}"
-  )
-  run_or_echo "${STAGE2_APPLY_CMD[@]}"
 fi
+STAGE2_INPUT_JSON="${STAGE2_INPUT_JSON:-${SHORTCUT_PIPELINE_DIR}/cross_modality_qa_input.json}"
+STAGE2_QA_JSONL="${STAGE2_QA_JSONL:-${SHORTCUT_PIPELINE_DIR}/cross_modality_qa_questions.jsonl}"
+STAGE2_MAPPING_JSON="${STAGE2_MAPPING_JSON:-${SHORTCUT_PIPELINE_DIR}/cross_modality_qa_mapping.json}"
+STAGE2_UNION_MASK_ROOT="${STAGE2_UNION_MASK_ROOT:-${SHORTCUT_PIPELINE_DIR}/union_mask}"
+STAGE2_MASK_ROOT="${STAGE2_MASK_ROOT:-${SHORTCUT_PIPELINE_DIR}/output_mask}"
+
+echo
+echo "Stage 1 post-step: prepare stage-2 masks"
+echo "Merged: ${STAGE2_MERGED_JSON}"
+echo "Ques:   ${STAGE2_QUESTIONS_JSON}"
+echo "Input:  ${STAGE2_INPUT_JSON}"
+echo "QA:     ${STAGE2_QA_JSONL}"
+echo "Map:    ${STAGE2_MAPPING_JSON}"
+echo "Union:  ${STAGE2_UNION_MASK_ROOT}"
+echo "Masks:  ${STAGE2_MASK_ROOT}"
+echo
+
+check_path "${VQA_TRAIN2014_IMAGE_ROOT}" "COCO train2014 image root"
+
+STAGE2_PREPARE_CMD=(
+  "${PYTHON_BIN}" "${SHORTCUT_CODE_DIR}/prepare_stage2_inputs.py"
+  --merged-json "${STAGE2_MERGED_JSON}"
+  --questions-json "${STAGE2_QUESTIONS_JSON}"
+  --output-json "${STAGE2_INPUT_JSON}"
+  --qa-jsonl "${STAGE2_QA_JSONL}"
+  --mapping-json "${STAGE2_MAPPING_JSON}"
+  --limit "${STAGE2_LIMIT}"
+)
+run_or_echo "${STAGE2_PREPARE_CMD[@]}"
+
+echo "Stage 2 preflight: verify SAM3 runtime imports"
+check_sam3_runtime
+
+declare -a SAM3_CKPT_ARGS=()
+sam3_ckpt_args "${SAM3_CHECKPOINT}" SAM3_CKPT_ARGS
+
+run_mask_shards \
+  "${BUNDLE_ROOT}/code/sam3/scripts/generate_union_masks_from_mapping.py" \
+  "${STAGE2_QA_JSONL}" \
+  "${STAGE2_MAPPING_JSON}" \
+  "${STAGE2_UNION_MASK_ROOT}" \
+  "${VQA_TRAIN2014_IMAGE_ROOT}" \
+  "${SAM3_CHECKPOINT}" \
+  "${SAM3_CKPT_ARGS[@]}"
+
+STAGE2_APPLY_CMD=(
+  "${PYTHON_BIN}" "${SHORTCUT_CODE_DIR}/apply_union_masks_to_images.py"
+  --qa-jsonl "${STAGE2_QA_JSONL}"
+  --mask-dir "${STAGE2_UNION_MASK_ROOT}/masks"
+  --image-root "${VQA_TRAIN2014_IMAGE_ROOT}"
+  --output-dir "${STAGE2_MASK_ROOT}"
+)
+run_or_echo "${STAGE2_APPLY_CMD[@]}"

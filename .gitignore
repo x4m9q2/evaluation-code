@@ -22,6 +22,7 @@ runs/
 # Large model/data artifacts
 models/**/*
 code/shortcut_pipeline/bin/**/*
+code/shortcut_pipeline/find_shortcut/build*/
 code/llava_sage/clip-vit-large-patch14-336
 third_party/clip-vit-large-patch14-336
 third_party/napo_llava_ref/RefoMB/**/*
