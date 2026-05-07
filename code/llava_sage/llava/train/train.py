@@ -1064,9 +1064,23 @@ def make_supervised_data_module(clip_tokenizer,tokenizer: transformers.PreTraine
 def train(attn_implementation=None):
     global local_rank
 
-    if "--evaluation_strategy" in sys.argv:
+    training_arg_fields = getattr(TrainingArguments, "__dataclass_fields__", {})
+    if (
+        "--evaluation_strategy" in sys.argv
+        and "evaluation_strategy" not in training_arg_fields
+        and "eval_strategy" in training_arg_fields
+    ):
         sys.argv = [
             "--eval_strategy" if arg == "--evaluation_strategy" else arg
+            for arg in sys.argv
+        ]
+    elif (
+        "--eval_strategy" in sys.argv
+        and "eval_strategy" not in training_arg_fields
+        and "evaluation_strategy" in training_arg_fields
+    ):
+        sys.argv = [
+            "--evaluation_strategy" if arg == "--eval_strategy" else arg
             for arg in sys.argv
         ]
 

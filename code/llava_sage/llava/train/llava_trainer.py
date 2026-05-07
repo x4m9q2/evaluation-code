@@ -276,7 +276,11 @@ class LLaVATrainer(Trainer):
                 image_token_count = int(inputs["input_ids"].eq(-200).sum().item())
             print(f"[debug-img] image_token_count={image_token_count} has_images={has_images}")
 
-        loss = super().training_step(model, inputs, num_items_in_batch=num_items_in_batch)
+        parent_training_step = super().training_step
+        if "num_items_in_batch" in inspect.signature(parent_training_step).parameters:
+            loss = parent_training_step(model, inputs, num_items_in_batch=num_items_in_batch)
+        else:
+            loss = parent_training_step(model, inputs)
 
         report_to = self.args.report_to
         if isinstance(report_to, str):
