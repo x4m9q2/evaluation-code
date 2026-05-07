@@ -1291,7 +1291,7 @@ def train(attn_implementation=None):
             torch.save(init_weight_to_save, os.path.join(training_args.output_dir, 'init_trainables.bin'))
     for name, param in model.named_parameters():
         if param.requires_grad:
-            print(f"✅ [可训练] 名称: {name} | 形状: {list(param.shape)} | 类型: {param.dtype}")
+            print(f"✅ [trainable] name: {name} | shape: {list(param.shape)} | dtype: {param.dtype}")
     # Only let rank0 initialize/watch wandb, otherwise multi-GPU launches multiple runs.
     if (training_args.local_rank in (0, -1)) and ("wandb" in training_args.report_to):
         import wandb
