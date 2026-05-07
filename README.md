@@ -387,11 +387,70 @@ judge used for final Acc/SR computation.
 
 #### 3.2.9 NaPO
 
+Before running LLaVA NaPO:
+
+- Download the official NaPO repository from
+  `https://github.com/zhangzef/NaPO`
+- Extract it without renaming and place it at `third_party/NaPO-master/`
+- Install the extra dependency required by the upstream code:
+
+```bash
+pip install matplotlib
+```
+
+Bundle-specific compatibility notes for the validated environment:
+
+- The local copy under `third_party/NaPO-master/` includes the upstream
+  `muffin/data/` package, which must be present for LLaVA NaPO training.
+- `third_party/NaPO-master/muffin/data/datasets.py` is patched to support
+  Hugging Face datasets stored with `datasets.save_to_disk()`. This is the
+  format produced by this bundle.
+- The same file also lazy-loads TSV support so HF-only runs do not fail just
+  because optional TSV utilities are absent.
+- `third_party/NaPO-master/utils/utils.py` moves the `matplotlib` import into
+  the plotting function so DPO training does not fail at import time when
+  plotting is unused.
+- `third_party/NaPO-master/muffin/train/trainers.py` accepts
+  `num_items_in_batch=None`, matching `transformers==4.51.3`, and removes a
+  debug print from the DPO path.
+- These compatibility changes do not alter NaPO preference construction, DPO
+  targets, or loss semantics.
+
+Wrapper-specific differences from upstream:
+
+- `scripts/run_napo_llava.sh` uses repository-relative paths and exports
+  `PYTHONPATH` to `third_party/NaPO-master/`.
+- The wrapper creates `third_party/clip-vit-large-patch14-336` as a local
+  symlink to the configured CLIP tower when needed.
+- The wrapper uses `--eval_strategy no` for compatibility with
+  `transformers==4.51.3`.
+- For normal bundle runs, use `scripts/run_napo_llava.sh` rather than the
+  original scripts under `third_party/NaPO-master/script/train/`.
+
 Build LLaVA NaPO preference data:
 
 ```bash
+SAGE_AS_DATASET=vqa bash scripts/run_build_shortcut_napo_splits.sh
 SAGE_AS_DATASET=vqa bash scripts/run_build_shortcut_napo_llava_dataset.sh
 ```
+
+`scripts/run_build_shortcut_napo_splits.sh` writes:
+
+- `data/napo/shortcut_generated_vqa/train.json`
+- `data/napo/shortcut_generated_vqa/val.json`
+- `data/napo/shortcut_generated_vqa/test.json`
+
+These preference splits are built from the shortcut stage-2 files:
+
+- `data/shortcut_pipeline/cross_modality_qa_input.json`
+- `data/shortcut_pipeline/batch_outputs/cross_modality_qa_responses.jsonl`
+
+The builder keeps only rows with both `generated_answer` and
+`original_answer`, filters out pairs where the two answers are identical, and
+stores them using the NaPO convention:
+
+- negative answer: `original_answer`
+- positive answer: `generated_answer`
 
 Run NaPO:
 
@@ -401,10 +460,23 @@ NAPO_LLAVA_OUTPUT_ROOT=checkpoints/napo_llava_vqa \
 bash scripts/run_napo_llava.sh
 ```
 
-NaPO convention:
+Validated local smoke run status:
 
-- negative answer: `original_answer`
-- positive answer: `generated_answer`
+- LLaVA NaPO has been verified in this bundle on a small HF dataset slice and
+  reaches actual trainer steps, not just argument parsing.
+- The expected input format for `NAPO_LLAVA_DATA_DIR` is a Hugging Face dataset
+  directory containing a `train` split saved with `datasets.save_to_disk()`.
+
+Validated smoke command:
+
+```bash
+PYTHON_BIN=$PWD/.venv_gemma/bin/python CUDA_VISIBLE_DEVICES=0,1,2,3 \
+PER_DEVICE_TRAIN_BATCH_SIZE=1 PER_DEVICE_EVAL_BATCH_SIZE=1 \
+GRADIENT_ACCUMULATION_STEPS=1 DATALOADER_NUM_WORKERS=0 LOGGING_STEPS=1 \
+NUM_EPOCHS=1 OUTPUT_DIR=outputs/napo_llava_shortcut_generated_smoke/checkpoints \
+LOGGING_DIR=outputs/napo_llava_shortcut_generated_smoke/log \
+EXTRA_ARGS='--max_steps 2' bash scripts/run_napo_llava.sh
+```
 
 #### 3.2.10 CausalMM
 
@@ -603,8 +675,19 @@ If `NAPO_DATA` is not set explicitly, the script defaults to:
 data/napo/shortcut_generated_vqa/train.json
 ```
 
-This is a separate input path from the mixed stage-2 SFT data. `vqa-build` does
-not read the preference files under `data/napo/`.
+This file is produced by:
+
+```bash
+SAGE_AS_DATASET=vqa bash scripts/run_build_shortcut_napo_splits.sh
+```
+
+It is generated from:
+
+- `data/shortcut_pipeline/cross_modality_qa_input.json`
+- `data/shortcut_pipeline/batch_outputs/cross_modality_qa_responses.jsonl`
+
+and is separate from the mixed stage-2 SFT data. `vqa-build` does not read the
+preference files under `data/napo/`.
 
 #### 4.2.10 CausalMM
 
