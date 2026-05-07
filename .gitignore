@@ -21,7 +21,10 @@ runs/
 
 # Large model/data artifacts
 models/**/*
+!models/models
 code/shortcut_pipeline/bin/**/*
+!code/shortcut_pipeline/bin/GMiner
+!code/shortcut_pipeline/bin/cuda
 code/shortcut_pipeline/find_shortcut/build*/
 code/llava_sage/clip-vit-large-patch14-336
 third_party/clip-vit-large-patch14-336
@@ -31,6 +34,10 @@ third_party/NaPO-master/minicpm-llama3-v-25/**/*
 third_party/NaPO-master/muffin/data/**/*
 annotations/**/*
 data/detect-shortcuts/**/*
+!data/detect-shortcuts/data/
+!data/detect-shortcuts/data/vqa2/
+!data/detect-shortcuts/data/vqa2/v2_OpenEnded_mscoco_train2014_questions.json
+!data/detect-shortcuts/data/vqa2/v2_mscoco_train2014_annotations.json
 data/eval/**/*
 data/napo/**/*
 data/napo_llava/**/*
@@ -38,12 +45,24 @@ data/stage2/**/*
 data/shortcut_pipeline/**/*
 data/sage_as/data/**/*
 data/sage_as/masks/**/*
+!data/sage_as/data/
+!data/sage_as/data/vqa_v2_cmsv
+!data/sage_as/data/gqa_cmsv
+!data/sage_as/data/vg_cmsv
+!data/sage_as/masks/
+!data/sage_as/masks/vqa_v2_cmsv_masks.npz
+!data/sage_as/masks/gqa_cmsv_masks.npz
+!data/sage_as/masks/vg_cmsv_masks.npz
 data/pretrain_llava_v1_5_mix665k_single_noocr_max200_imageonly_strict_noocr.json
 data/pretrain_llava_v1_5_mix665k_single_noocr_max200_imageonly_strict_noocr.stats.json
 data/images/**/*
+!data/images
 data/playground_data/**/*
+!data/playground_data
 data/pope/**/*
+!data/pope
 data/beaf/**/*
+!data/beaf
 data/llava_stage1/**/*
 data/llava_stage2/**/*
 data/masks/**/*
@@ -81,3 +100,8 @@ data2/**/*
 !data/sage_as/summary.json
 !data/sage_as/upload_sanitization_report.json
 !data/sage_as/upload_scan_report.json
+!data/sage_as/metadata
+!third_party/NaPO-master/NaPO-master
+!data/sage_as/masks/vqa_v2_cmsv_masks.npz
+!data/sage_as/masks/gqa_cmsv_masks.npz
+!data/sage_as/masks/vg_cmsv_masks.npz
