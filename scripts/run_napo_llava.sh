@@ -4,7 +4,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common_llava.sh"
 
 require_cuda_visible_devices_count 4 "NaPO LLaVA training"
 
-NAPO_LLAVA_ROOT="${BUNDLE_ROOT}/third_party/napo_llava_ref"
+NAPO_LLAVA_ROOT="${BUNDLE_ROOT}/third_party/NaPO-master"
 export PYTHONPATH="${NAPO_LLAVA_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 NAPO_LOCAL_CLIP_LINK="${BUNDLE_ROOT}/third_party/clip-vit-large-patch14-336"
 if [[ ! -e "${NAPO_LOCAL_CLIP_LINK}" ]]; then

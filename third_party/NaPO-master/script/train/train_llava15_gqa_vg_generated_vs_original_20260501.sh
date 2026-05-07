@@ -10,7 +10,7 @@ export MUFFIN_LOGP_NUM_WORKERS="${MUFFIN_LOGP_NUM_WORKERS:-4}"
 
 MODEL_PATH="${MODEL_PATH:-models/llava-v1.5-7b}"
 VISION_TOWER="${VISION_TOWER:-models/clip-vit-large-patch14-336}"
-OUTPUT_ROOT="${OUTPUT_ROOT:-third_party/napo_llava_ref/.ckpt}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-third_party/NaPO-master/.ckpt}"
 
 NUM_EPOCHS="${NUM_EPOCHS:-3}"
 PER_DEVICE_TRAIN_BATCH_SIZE="${PER_DEVICE_TRAIN_BATCH_SIZE:-16}"
@@ -92,8 +92,8 @@ run_one() {
 }
 
 TIMESTAMP="${TIMESTAMP:-$(date -u +%Y%m%d_%H%M%S)}"
-GQA_DATA_DIR="${GQA_DATA_DIR:-third_party/napo_llava_ref/datasets/gqa_area001_max0p5_genans_pos_origans_neg_hf}"
-VG_DATA_DIR="${VG_DATA_DIR:-third_party/napo_llava_ref/datasets/vg_area001_max0p5_genans_pos_origans_neg_hf}"
+GQA_DATA_DIR="${GQA_DATA_DIR:-third_party/NaPO-master/datasets/gqa_area001_max0p5_genans_pos_origans_neg_hf}"
+VG_DATA_DIR="${VG_DATA_DIR:-third_party/NaPO-master/datasets/vg_area001_max0p5_genans_pos_origans_neg_hf}"
 GQA_RUN_NAME="${GQA_RUN_NAME:-napo_gqa_area001_max0p5_genans_pos_origans_neg_3epoch_${TIMESTAMP}}"
 VG_RUN_NAME="${VG_RUN_NAME:-napo_vg_area001_max0p5_genans_pos_origans_neg_3epoch_${TIMESTAMP}}"
 

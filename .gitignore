@@ -25,10 +25,10 @@ code/shortcut_pipeline/bin/**/*
 code/shortcut_pipeline/find_shortcut/build*/
 code/llava_sage/clip-vit-large-patch14-336
 third_party/clip-vit-large-patch14-336
-third_party/napo_llava_ref/RefoMB/**/*
-third_party/napo_llava_ref/eval/**/*
-third_party/napo_llava_ref/minicpm-llama3-v-25/**/*
-third_party/napo_llava_ref/muffin/data/**/*
+third_party/NaPO-master/RefoMB/**/*
+third_party/NaPO-master/eval/**/*
+third_party/NaPO-master/minicpm-llama3-v-25/**/*
+third_party/NaPO-master/muffin/data/**/*
 annotations/**/*
 data/detect-shortcuts/**/*
 data/eval/**/*

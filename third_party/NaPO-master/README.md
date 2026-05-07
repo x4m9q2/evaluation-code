@@ -18,7 +18,7 @@ The canonical bundle entrypoint is:
 bash scripts/run_napo_llava.sh
 ```
 
-Prefer that wrapper over upstream scripts inside `third_party/napo_llava_ref/`
+Prefer that wrapper over upstream scripts inside `third_party/NaPO-master/`
 unless you are debugging the imported NaPO code itself.
 
 ### Local Compatibility Changes
@@ -72,10 +72,10 @@ The top-level wrapper defaults to:
 Build it from the shortcut stage-2 outputs with:
 
 ```bash
-RUN=1 PYTHON_BIN=$PWD/.venv_gemma/bin/python \
+PYTHON_BIN=$PWD/.venv_gemma/bin/python \
   bash scripts/run_build_shortcut_napo_splits.sh
 
-RUN=1 PYTHON_BIN=$PWD/.venv_gemma/bin/python \
+PYTHON_BIN=$PWD/.venv_gemma/bin/python \
   bash scripts/run_build_shortcut_napo_llava_dataset.sh
 ```
 

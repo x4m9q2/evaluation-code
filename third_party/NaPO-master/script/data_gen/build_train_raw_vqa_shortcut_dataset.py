@@ -42,7 +42,7 @@ def main():
     )
     parser.add_argument(
         "--output-dir",
-        default="third_party/napo_llava_ref/datasets/train_raw_vqa_shortcut_hf",
+        default="third_party/NaPO-master/datasets/train_raw_vqa_shortcut_hf",
     )
     parser.add_argument(
         "--stats-path",

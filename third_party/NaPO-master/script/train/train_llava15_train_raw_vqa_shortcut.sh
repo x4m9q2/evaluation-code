@@ -12,8 +12,8 @@ RUN_NAME="${RUN_NAME:-train_raw_vqa_shortcut_dpo_${TIMESTAMP}}"
 
 MODEL_PATH="${MODEL_PATH:-models/llava-v1.5-7b}"
 VISION_TOWER="${VISION_TOWER:-models/clip-vit-large-patch14-336}"
-DATA_DIR="${DATA_DIR:-third_party/napo_llava_ref/datasets/train_raw_vqa_shortcut_hf}"
-OUTPUT_ROOT="${OUTPUT_ROOT:-third_party/napo_llava_ref/.ckpt}"
+DATA_DIR="${DATA_DIR:-third_party/NaPO-master/datasets/train_raw_vqa_shortcut_hf}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-third_party/NaPO-master/.ckpt}"
 OUTPUT_DIR="${OUTPUT_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/checkpoints}"
 LOGGING_DIR="${LOGGING_DIR:-${OUTPUT_ROOT}/${RUN_NAME}/log}"
 

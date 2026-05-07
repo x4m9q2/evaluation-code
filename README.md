@@ -643,8 +643,10 @@ Main dependency notes:
   license notice and cite the CausalMM paper when using it.
 - The Gemma CausalMM adaptation is under `code/beaf_causalmm/gemma3/` and is an
   adaptation of the counterfactual decoding idea to Gemma.
-- A NaPO reference snapshot is kept under `third_party/napo_llava_ref/`; retain
-  upstream notices and license files when using it.
+- Download the official NaPO repository from
+  `https://github.com/zhangzef/NaPO`, extract it without renaming, and place
+  the resulting directory at `third_party/NaPO-master/`. Retain upstream
+  notices and license files when using it.
 - POPE and BEAF are external hallucination-evaluation resources; this
   repository only keeps wrapper scripts and does not redistribute the datasets.
 - SAM3 source code and Qwen-filtering scripts are included in the bundle, but
