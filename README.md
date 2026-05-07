@@ -164,8 +164,7 @@ bash scripts/run_shortcut_stage2.sh
 ```
 
 If you want to submit stage-2 requests to an API, pass the API settings
-explicitly. The wrapper and `submit_batch_requests.py` no longer read Codex or
-editor-local config files automatically. Provide:
+explicitly. Provide:
 
 ```bash
 OPENAI_BASE_URL=...
