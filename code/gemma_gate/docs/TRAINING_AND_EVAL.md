@@ -165,7 +165,7 @@ evaluate only normal correctness against `answer`.
 This repo currently keeps two separate NaPO paths:
 
 - Gemma NaPO: top-level wrapper `scripts/run_napo_shortcut.sh`, reading
-  `data/napo/train_raw_pos_neg_shortcut.json`
+  `data/napo/shortcut_generated_vqa/train.json`
 - LLaVA NaPO: top-level wrapper `scripts/run_napo_llava.sh`, reading
   `data/napo_llava/train_raw_pos_neg_shortcut_hf`
 

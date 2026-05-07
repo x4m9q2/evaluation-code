@@ -14,14 +14,19 @@ NUM_TRAIN_EPOCHS="${NUM_TRAIN_EPOCHS:-3}"
 REPORT_TO="${REPORT_TO:-none}"
 MAX_STEPS="${MAX_STEPS:--1}"
 EXTRA_ARGS="${EXTRA_ARGS:-}"
+NAPO_IMAGE_FOLDER="${NAPO_IMAGE_FOLDER:-${BUNDLE_ROOT}/data/images/coco/train2014}"
 
 mkdir -p "${OUTPUT_DIR}" "$(dirname "${LOG_FILE}")"
+
+check_path "${BASE_MODEL_ID}" "Gemma base model"
+check_path "${NAPO_DATA}" "Gemma NaPO preference JSON"
+check_path "${NAPO_IMAGE_FOLDER}" "NaPO image folder"
 
 {
   echo "[run] ${RUN_NAME}"
   echo "[model] ${BASE_MODEL_ID}"
   echo "[data] ${NAPO_DATA}"
-  echo "[image_folder] ${STAGE2_IMAGE_FOLDER}"
+  echo "[image_folder] ${NAPO_IMAGE_FOLDER}"
   echo "[output] ${OUTPUT_DIR}"
   echo "[loss] type=${NAPO_LOSS_TYPE:-dyn_lq} beta=${BETA:-0.1} alpha=${NAPO_ALPHA:-0.5} dyn_q_avg=${NAPO_DYN_Q_USE_AVERAGE:-True}"
   echo "[gate] disabled by default"
@@ -36,7 +41,7 @@ cd "${GEMMA_DIR}"
   src/train/train_dpo.py \
   --model_id "${BASE_MODEL_ID}" \
   --data_path "${NAPO_DATA}" \
-  --image_folder "${STAGE2_IMAGE_FOLDER}" \
+  --image_folder "${NAPO_IMAGE_FOLDER}" \
   --use_dual_input_gate "${USE_DUAL_INPUT_GATE:-False}" \
   --napo_loss_type "${NAPO_LOSS_TYPE:-dyn_lq}" \
   --napo_alpha "${NAPO_ALPHA:-0.5}" \

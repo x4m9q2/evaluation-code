@@ -20,14 +20,16 @@ DEFAULT_BUNDLE_ROOT = Path(__file__).resolve().parents[3]
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Build the qwenkeep stage2 VQA package: keep SAM3 masks for filtered train_raw "
-            "rows, keep removed rows without masks, and append VQAv2 rows without masks."
+            "Build the qwenkeep stage2 VQA package: keep SAM3 masks for filtered generated-train "
+            "rows, keep removed rows without masks, and append original VQA rows from CMSV "
+            "train/val/test without masks."
         )
     )
     parser.add_argument(
-        "--train-raw",
+        "--generated-train",
         type=Path,
-        default=DEFAULT_BUNDLE_ROOT / "data/stage2/train_raw.json",
+        default=DEFAULT_BUNDLE_ROOT / "data/shortcut_pipeline/vqa_v2_cmsv/train.json",
+        help="Generated train split used for supervised rows and Qwen keep/remove filtering.",
     )
     parser.add_argument(
         "--keep-json",
@@ -42,14 +44,19 @@ def parse_args() -> argparse.Namespace:
         / "analysis/visual_cue_question_filter_qwen35_strict4/full_all_shards/merged/remove.json",
     )
     parser.add_argument(
-        "--vqav2-train",
+        "--original-split",
         type=Path,
-        default=DEFAULT_BUNDLE_ROOT / "data/stage2/vqa_train2014.json",
+        action="append",
+        default=None,
+        help=(
+            "CMSV split JSON files containing original_question/original_answer. "
+            "If omitted, defaults to data/shortcut_pipeline/vqa_v2_cmsv/{train,val,test}.json."
+        ),
     )
     parser.add_argument(
         "--mask-dir",
         type=Path,
-        default=DEFAULT_BUNDLE_ROOT / "outputs/sam3_train_raw_llava_union_masks/masks",
+        default=DEFAULT_BUNDLE_ROOT / "data/shortcut_pipeline/union_mask/masks",
     )
     parser.add_argument(
         "--output-json",
@@ -89,7 +96,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--limit-keep", type=int, default=None)
     parser.add_argument("--limit-remove", type=int, default=None)
-    parser.add_argument("--limit-vqa", type=int, default=None)
+    parser.add_argument("--limit-original", type=int, default=None)
+    parser.add_argument(
+        "--original-question-id-offset",
+        type=int,
+        default=None,
+        help=(
+            "Offset added to source question_id for appended original no-mask rows. "
+            "Default: max generated-train question_id + 1."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -233,20 +249,67 @@ def maybe_limit(rows: list[Any], limit: int | None) -> list[Any]:
     return rows[:limit]
 
 
+def default_original_splits() -> list[Path]:
+    base = DEFAULT_BUNDLE_ROOT / "data/shortcut_pipeline/vqa_v2_cmsv"
+    return [base / "train.json", base / "val.json", base / "test.json"]
+
+
+def build_original_rows(split_paths: list[Path]) -> tuple[list[dict[str, Any]], Counter]:
+    original_rows: list[dict[str, Any]] = []
+    original_by_split: Counter = Counter()
+    seen_keys: set[tuple[int, str, str]] = set()
+
+    for path in split_paths:
+        split_name = path.stem.strip().lower() or "unknown"
+        rows = load_json(path)
+        if not isinstance(rows, list):
+            raise ValueError(f"Expected a list in original split: {path}")
+        for row in rows:
+            question = str(row.get("original_question", "")).strip()
+            answer = str(row.get("original_answer", "")).strip()
+            image_id = row.get("image_id")
+            answer_type = str(row.get("answer_type", "other")).strip() or "other"
+            if not question or not answer or image_id is None:
+                raise ValueError(
+                    f"Missing original_question/original_answer/image_id in {path} "
+                    f"for question_id={row.get('question_id')}"
+                )
+
+            image_id_int = int(image_id)
+            dedup_key = (image_id_int, question, answer)
+            if dedup_key in seen_keys:
+                continue
+            seen_keys.add(dedup_key)
+            original_rows.append(
+                {
+                    "question_id": int(row["question_id"]),
+                    "source_question_id": int(row["question_id"]),
+                    "question": question,
+                    "image_id": image_id_int,
+                    "answer": answer,
+                    "answer_type": answer_type,
+                    "origin_split": split_name,
+                }
+            )
+            original_by_split[split_name] += 1
+
+    return original_rows, original_by_split
+
+
 def main() -> None:
     args = parse_args()
+    original_split_paths = args.original_split or default_original_splits()
 
-    train_raw = [normalize_train_row(x) for x in load_json(args.train_raw)]
+    train_raw = [normalize_train_row(x) for x in load_json(args.generated_train)]
     train_by_qid = {int(x["question_id"]): x for x in train_raw}
     if len(train_by_qid) != len(train_raw):
-        raise ValueError("Duplicate question_id in train_raw.")
+        raise ValueError("Duplicate question_id in generated_train.")
 
     keep_rows = maybe_limit(load_json(args.keep_json), args.limit_keep)
     remove_rows = maybe_limit(load_json(args.remove_json), args.limit_remove)
-    vqa_rows = maybe_limit(
-        [normalize_train_row(x) for x in load_json(args.vqav2_train)],
-        args.limit_vqa,
-    )
+    original_rows, original_by_split = build_original_rows(original_split_paths)
+    original_rows = maybe_limit(original_rows, args.limit_original)
+    original_by_split = Counter(str(row.get("origin_split", "unknown")) for row in original_rows)
 
     keep_qids = [int(x["question_id"]) for x in keep_rows]
     remove_qids = [int(x["question_id"]) for x in remove_rows]
@@ -259,7 +322,7 @@ def main() -> None:
     train_qids = set(train_by_qid)
     missing_train_qids = (keep_qid_set | remove_qid_set) - train_qids
     if missing_train_qids:
-        raise ValueError(f"Missing question ids in train_raw: {sorted(missing_train_qids)[:20]}")
+        raise ValueError(f"Missing question ids in generated_train: {sorted(missing_train_qids)[:20]}")
 
     if args.limit_keep is None and args.limit_remove is None and (keep_qid_set | remove_qid_set) != train_qids:
         missing = sorted(train_qids - (keep_qid_set | remove_qid_set))[:20]
@@ -299,11 +362,24 @@ def main() -> None:
         row["mask_supervision"] = "none"
         mixed_rows.append(row)
 
-    for row in vqa_rows:
+    original_qid_offset = (
+        args.original_question_id_offset
+        if args.original_question_id_offset is not None
+        else (max(train_qids) + 1 if train_qids else 1)
+    )
+    for idx, row in enumerate(original_rows):
         out = dict(row)
-        out["data_source"] = "vqa_train2014_nomask"
+        # Keep original no-mask rows outside the generated-train qid space so mask matching
+        # cannot accidentally activate on them.
+        out["question_id"] = original_qid_offset + idx
+        out["data_source"] = f"vqa_original_{out.get('origin_split', 'unknown')}_nomask"
         out["mask_supervision"] = "none"
         mixed_rows.append(out)
+
+    qid_counts = Counter(int(x["question_id"]) for x in mixed_rows)
+    duplicate_qids = [qid for qid, count in qid_counts.items() if count > 1]
+    if duplicate_qids:
+        raise ValueError(f"Output contains duplicate question_id values: {duplicate_qids[:20]}")
 
     if args.shuffle_seed is not None:
         random.Random(args.shuffle_seed).shuffle(mixed_rows)
@@ -322,22 +398,30 @@ def main() -> None:
         metadata_extra={
             "compat_source": "qwen_keep_nonumbermask",
             "compat_source_json": str(args.output_json),
+            "compat_generated_train": str(args.generated_train),
             "compat_keep_json": str(args.keep_json),
             "compat_remove_json": str(args.remove_json),
+            "compat_original_splits": [str(path) for path in original_split_paths],
+            "original_question_id_offset": original_qid_offset,
             "nonumbermask_rule": "keep all JSON rows, but set answer_type == 'number' mask_supervision to none and drop those mask rows from NPZ",
+            "mixed_sample_rule": "generated train questions plus original questions reconstructed from generated train/val/test splits; original rows are no-mask and question_id-offset to avoid NPZ mask collisions",
         },
     )
 
     summary = {
         "output_json": str(args.output_json),
         "output_mask_npz": str(args.output_mask_npz),
-        "train_raw_total": len(train_raw),
-        "train_raw_keep_total": len(keep_qids),
-        "train_raw_remove_total": len(remove_qids),
-        "train_raw_masked_total": len(mask_rows),
-        "train_raw_missingmask_nomask_total": len(missing_mask_qids),
-        "train_raw_number_mask_removed_total": len(number_mask_removed_qids),
-        "vqa_total": len(vqa_rows),
+        "generated_train": str(args.generated_train),
+        "original_splits": [str(path) for path in original_split_paths],
+        "generated_train_total": len(train_raw),
+        "generated_train_keep_total": len(keep_qids),
+        "generated_train_remove_total": len(remove_qids),
+        "generated_train_masked_total": len(mask_rows),
+        "generated_train_missingmask_nomask_total": len(missing_mask_qids),
+        "generated_train_number_mask_removed_total": len(number_mask_removed_qids),
+        "original_total": len(original_rows),
+        "original_by_split": dict(original_by_split),
+        "original_question_id_offset": original_qid_offset,
         "mixed_total": len(mixed_rows),
         "shuffle_seed": args.shuffle_seed,
         "sources": dict(Counter(x["data_source"] for x in mixed_rows)),

@@ -12,7 +12,13 @@ FILTER_TEMPERATURE="${FILTER_TEMPERATURE:-0.0}"
 QWEN_MODEL="${QWEN_MODEL:-${BUNDLE_ROOT}/models/Qwen3.5-9B}"
 FILTER_LOG_DIR="${FILTER_LOG_DIR:-${LOG_ROOT}/qwen_visual_cue_filter}"
 
-VQA_FILTER_INPUT_ROOT="${VQA_FILTER_INPUT_ROOT:-${BUNDLE_ROOT}/outputs/sam3_train_raw_llava_union_masks}"
+if [[ -z "${VQA_FILTER_INPUT_ROOT:-}" ]]; then
+  if [[ -d "${BUNDLE_ROOT}/outputs/sam3_vqa_cmsv_union_masks/shard_meta" ]]; then
+    VQA_FILTER_INPUT_ROOT="${BUNDLE_ROOT}/outputs/sam3_vqa_cmsv_union_masks"
+  else
+    VQA_FILTER_INPUT_ROOT="${BUNDLE_ROOT}/data/shortcut_pipeline/union_mask"
+  fi
+fi
 VQA_FILTER_OUTPUT_ROOT="${VQA_FILTER_OUTPUT_ROOT:-${BUNDLE_ROOT}/analysis/visual_cue_question_filter_qwen35_strict4/full_all_shards}"
 GQA_FILTER_INPUT_ROOT="${GQA_FILTER_INPUT_ROOT:-${BUNDLE_ROOT}/analysis/gqa_sampled10000_sam3_union_masks}"
 GQA_FILTER_OUTPUT_ROOT="${GQA_FILTER_OUTPUT_ROOT:-${BUNDLE_ROOT}/analysis/gqa_sampled10000_qwen35_filter}"

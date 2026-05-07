@@ -28,9 +28,9 @@ case "${TASK}" in
     print_help
     ;;
   vqa-generate)
-    VQA_QA_JSONL="${VQA_QA_JSONL:-${BUNDLE_ROOT}/data/stage2/train_raw_llava.jsonl}"
-    VQA_MAPPING_JSON="${VQA_MAPPING_JSON:-${BUNDLE_ROOT}/data/stage2/merged_output_rule_mapping.json}"
-    VQA_MASK_OUTPUT="${VQA_MASK_OUTPUT:-${BUNDLE_ROOT}/outputs/sam3_train_raw_llava_union_masks}"
+    VQA_QA_JSONL="${VQA_QA_JSONL:-${BUNDLE_ROOT}/data/shortcut_pipeline/cross_modality_qa_questions.jsonl}"
+    VQA_MAPPING_JSON="${VQA_MAPPING_JSON:-${BUNDLE_ROOT}/data/shortcut_pipeline/cross_modality_qa_mapping.json}"
+    VQA_MASK_OUTPUT="${VQA_MASK_OUTPUT:-${BUNDLE_ROOT}/outputs/sam3_vqa_cmsv_union_masks}"
     check_path "${SAM3_CHECKPOINT}" "SAM3 checkpoint"
     check_path "${VQA_QA_JSONL}" "VQA QA JSONL"
     check_path "${VQA_MAPPING_JSON}" "VQA rule mapping"
@@ -50,10 +50,51 @@ case "${TASK}" in
       --shard-index "${SHARD_INDEX:-0}"
     ;;
   vqa-filter)
+    if [[ -z "${VQA_FILTER_INPUT_ROOT:-}" ]]; then
+      if [[ -d "${BUNDLE_ROOT}/outputs/sam3_vqa_cmsv_union_masks/shard_meta" ]]; then
+        export VQA_FILTER_INPUT_ROOT="${BUNDLE_ROOT}/outputs/sam3_vqa_cmsv_union_masks"
+      else
+        export VQA_FILTER_INPUT_ROOT="${BUNDLE_ROOT}/data/shortcut_pipeline/union_mask"
+      fi
+    fi
     run_or_echo bash "${BUNDLE_ROOT}/scripts/run_qwen_visual_cue_filter.sh" vqa
     ;;
   vqa-build)
-    run_or_echo "${PYTHON_BIN}" "${BUNDLE_ROOT}/code/llava_sage/scripts2/build_qwenkeep_stage2_package.py" "$@"
+    VQA_GENERATED_TRAIN_JSON="${VQA_GENERATED_TRAIN_JSON:-${BUNDLE_ROOT}/data/shortcut_pipeline/vqa_v2_cmsv/train.json}"
+    VQA_KEEP_JSON="${VQA_KEEP_JSON:-${BUNDLE_ROOT}/analysis/visual_cue_question_filter_qwen35_strict4/full_all_shards/merged/keep.json}"
+    VQA_REMOVE_JSON="${VQA_REMOVE_JSON:-${BUNDLE_ROOT}/analysis/visual_cue_question_filter_qwen35_strict4/full_all_shards/merged/remove.json}"
+    VQA_ORIGINAL_SPLIT_TRAIN="${VQA_ORIGINAL_SPLIT_TRAIN:-${BUNDLE_ROOT}/data/shortcut_pipeline/vqa_v2_cmsv/train.json}"
+    VQA_ORIGINAL_SPLIT_VAL="${VQA_ORIGINAL_SPLIT_VAL:-${BUNDLE_ROOT}/data/shortcut_pipeline/vqa_v2_cmsv/val.json}"
+    VQA_ORIGINAL_SPLIT_TEST="${VQA_ORIGINAL_SPLIT_TEST:-${BUNDLE_ROOT}/data/shortcut_pipeline/vqa_v2_cmsv/test.json}"
+    if [[ -z "${VQA_MASK_DIR:-}" ]]; then
+      if [[ -d "${BUNDLE_ROOT}/outputs/sam3_vqa_cmsv_union_masks/masks" ]]; then
+        VQA_MASK_DIR="${BUNDLE_ROOT}/outputs/sam3_vqa_cmsv_union_masks/masks"
+      else
+        VQA_MASK_DIR="${BUNDLE_ROOT}/data/shortcut_pipeline/union_mask/masks"
+      fi
+    fi
+    VQA_OUTPUT_JSON="${VQA_OUTPUT_JSON:-${BUNDLE_ROOT}/data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa_nonumbermask.json}"
+    VQA_OUTPUT_NPZ="${VQA_OUTPUT_NPZ:-${BUNDLE_ROOT}/data/stage2/patch_mask_analysis_train_raw_qwenkeep_sam3_nonumbermask_compat.npz}"
+    VQA_SUMMARY_JSON="${VQA_SUMMARY_JSON:-${BUNDLE_ROOT}/data/stage2/train_raw_mixed_qwenratio_oldbase_sam3_plus_vqa_nonumbermask.summary.json}"
+    check_path "${VQA_GENERATED_TRAIN_JSON}" "VQA generated-train JSON"
+    check_path "${VQA_KEEP_JSON}" "Qwen keep JSON"
+    check_path "${VQA_REMOVE_JSON}" "Qwen remove JSON"
+    check_path "${VQA_ORIGINAL_SPLIT_TRAIN}" "VQA original-source train split"
+    check_path "${VQA_ORIGINAL_SPLIT_VAL}" "VQA original-source val split"
+    check_path "${VQA_ORIGINAL_SPLIT_TEST}" "VQA original-source test split"
+    check_path "${VQA_MASK_DIR}" "VQA SAM3 mask directory"
+    run_or_echo "${PYTHON_BIN}" "${BUNDLE_ROOT}/code/llava_sage/scripts2/build_qwenkeep_stage2_package.py" \
+      --generated-train "${VQA_GENERATED_TRAIN_JSON}" \
+      --keep-json "${VQA_KEEP_JSON}" \
+      --remove-json "${VQA_REMOVE_JSON}" \
+      --original-split "${VQA_ORIGINAL_SPLIT_TRAIN}" \
+      --original-split "${VQA_ORIGINAL_SPLIT_VAL}" \
+      --original-split "${VQA_ORIGINAL_SPLIT_TEST}" \
+      --mask-dir "${VQA_MASK_DIR}" \
+      --output-json "${VQA_OUTPUT_JSON}" \
+      --output-mask-npz "${VQA_OUTPUT_NPZ}" \
+      --summary-json "${VQA_SUMMARY_JSON}" \
+      "$@"
     ;;
   gqa-vg-generate)
     check_path "${SAM3_CHECKPOINT}" "SAM3 checkpoint"
